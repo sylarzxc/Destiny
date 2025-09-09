@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <title>Redirecting…</title>
-  <!-- Миттєвий редирект -->
-  <meta http-equiv="refresh" content="0; url=./desteny web/desteny/index.html" />
+  <!-- Миттєвий редирект (пробіл закодовано як %20) -->
+  <meta http-equiv="refresh" content="0; url=./desteny%20web/desteny/index.html" />
   <link rel="canonical" href="./desteny%20web/desteny/index.html" />
   <script>
     (function () {
       // Зберігаємо ?query та #hash під час редиректу
-      var base = './desteny web/desteny/index.html';
+      var base = './desteny%20web/desteny/index.html';
       var target = base + (window.location.search || '') + (window.location.hash || '');
       window.location.replace(target);
     })();
@@ -22,7 +22,7 @@
 <body>
   <h1>Redirecting…</h1>
   <p>Якщо сторінка не перенаправилась автоматично, натисніть:
-    <a href="./desteny web/desteny/index.html">перейти до головної сторінки</a>.
+    <a href="./desteny%20web/desteny/index.html">перейти до головної сторінки</a>.
   </p>
 </body>
 </html>
