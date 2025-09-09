@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Destiny – Log In (v0.1)</title>
+    <!-- Custom login page styles -->
+    <link rel="stylesheet" href="login.css" />
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for potential icons (not currently used) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-2OjPO5sCLr4k03mMdzhjmClWshcDv+fpw0CWD1V4nI+HITZB8LrSxrLri6/9YoB5kkkoq3t/7KwmckKeXPyxRg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body class="auth-body">
+    <!-- Background image -->
+    <div class="auth-bg-wrapper">
+      <img src="assets/cosmic-bg.png" alt="Cosmic background" class="auth-bg" />
+    </div>
+    <!-- Logo and heading -->
+    <header class="auth-header">
+      <a href="../desteny/index.html" class="auth-logo">DESTINY</a>
+    </header>
+    <!-- Login form -->
+    <section class="auth-section">
+      <!-- Heading directly above the card to mirror the reference layout -->
+      <h2 class="auth-heading">Log in</h2>
+      <div class="auth-card">
+        <form class="auth-form" action="#" method="post" onsubmit="return false;">
+          <input
+            type="text"
+            id="login-email"
+            name="email"
+            placeholder="Email or username"
+            required
+          />
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+          <button type="submit" class="auth-btn">Log in</button>
+          <p class="auth-alt">
+            Don’t have an account?
+            <a href="../desteny register/register.html" class="auth-link">Register</a>
+          </p>
+          <p class="auth-alt">
+            Forgot your password?
+            <a href="#" class="auth-link">Restore</a>
+          </p>
+        </form>
+      </div>
+    </section>
+    <!-- Footer links -->
+    <footer class="auth-footer">
+      <div class="auth-footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">T&amp;Cs</a>
+        <a href="#">Docs</a>
+      </div>
+    </footer>
+    <!-- Supabase UMD + env + client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script src="../desteny/env.js"></script>
+    <script src="../desteny/supabaseClient.js"></script>
+    <!-- Custom JS for login page -->
+    <script src="login.js"></script>
+  </body>
+</html>

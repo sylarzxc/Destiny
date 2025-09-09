@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Destiny – Register Account (v0.1)</title>
+    <!-- Custom register page styles -->
+    <link rel="stylesheet" href="register.css" />
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome (optional) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-2OjPO5sCLr4k03mMdzhjmClWshcDv+fpw0CWD1V4nI+HITZB8LrSxrLri6/9YoB5kkkoq3t/7KwmckKeXPyxRg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body class="auth-body">
+    <!-- Background image -->
+    <div class="auth-bg-wrapper">
+      <img src="assets/cosmic-bg.png" alt="Cosmic background" class="auth-bg" />
+    </div>
+    <!-- Logo only -->
+    <header class="auth-header">
+      <a href="../desteny/index.html" class="auth-logo">DESTINY</a>
+    </header>
+    <!-- Register form -->
+    <section class="auth-section">
+      <!-- Heading above the card -->
+      <h2 class="auth-heading">Register Account</h2>
+      <div class="auth-card">
+        <form class="auth-form" action="#" method="post" onsubmit="return false;">
+          <input
+            type="email"
+            id="register-mail"
+            name="mail"
+            placeholder="Mail"
+            required
+          />
+          <input
+            type="text"
+            id="register-login"
+            name="login"
+            placeholder="Login"
+            required
+          />
+          <input
+            type="password"
+            id="register-password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+          <input
+            type="password"
+            id="register-repeat"
+            name="repeat_password"
+            placeholder="Repeat Password"
+            required
+          />
+          <input
+            type="text"
+            id="register-promo"
+            name="promo"
+            placeholder="Promocode (optional)"
+          />
+          <button type="submit" class="auth-btn">Register Account</button>
+          <p class="auth-alt">
+            Already have an account?
+            <a href="../desteny login/login.html" class="auth-link">Log in</a>
+          </p>
+        </form>
+      </div>
+    </section>
+    <!-- Footer links -->
+    <footer class="auth-footer">
+      <div class="auth-footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">T&amp;Cs</a>
+        <a href="#">Docs</a>
+      </div>
+    </footer>
+    <!-- Supabase UMD + env + client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script src="../desteny/env.js"></script>
+    <script src="../desteny/supabaseClient.js"></script>
+    <!-- Custom JS for register page -->
+    <script src="register.js"></script>
+  </body>
+</html>

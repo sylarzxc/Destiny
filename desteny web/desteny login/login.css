@@ -1,0 +1,188 @@
+/* Destiny Login Page standalone styles (version 0.1) */
+/* Custom properties for colours and spacing */
+:root {
+  --bg-color: #050a1c;
+  --card-bg: rgba(13, 27, 42, 0.6);
+  --card-border: linear-gradient(135deg, #5d76f7, #9c48ec);
+  --primary-color: #5d76f7;
+  --secondary-color: #9c48ec;
+  --text-color: #ffffff;
+  --muted-color: #8a8fa7;
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.auth-body {
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animation for elements sliding down into view */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-bg-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.auth-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.5);
+}
+
+.auth-header {
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: slideDown 0.8s ease forwards;
+  animation-delay: 0.1s;
+}
+
+.auth-logo {
+  display: inline-block;
+  /* Increase logo size for a more dramatic entrance */
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: var(--card-border);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+}
+
+.auth-heading {
+  margin-top: 0.5rem;
+  /* Larger heading for emphasis */
+  font-size: 1.8rem;
+  color: var(--text-color);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: slideDown 0.8s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.auth-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Center the heading and card vertically and horizontally */
+  align-items: center;
+  padding-bottom: 4rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  /* Start transparent and slide down into place */
+  opacity: 0;
+  animation: slideDown 0.8s ease forwards;
+  animation-delay: 0.3s;
+}
+
+.auth-form input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-family: inherit;
+  margin-bottom: 1.2rem;
+  transition: border-color 0.2s;
+}
+
+.auth-form input::placeholder {
+  color: var(--muted-color);
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.auth-btn {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-image: linear-gradient(90deg, #7450f4, #a450f4, #ff7edb);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.auth-alt {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--muted-color);
+}
+
+/* Reduce spacing when multiple auth-alt paragraphs are stacked */
+.auth-form .auth-alt + .auth-alt {
+  margin-top: 0.5rem;
+}
+
+.auth-alt .auth-link {
+  color: #9f75f2;
+  text-decoration: underline;
+}
+
+.auth-footer {
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.8rem;
+  color: var(--muted-color);
+}
+
+.auth-footer-links a {
+  margin: 0 0.75rem;
+  color: var(--muted-color);
+  transition: color 0.2s;
+}
+
+.auth-footer-links a:hover {
+  color: var(--primary-color);
+}
