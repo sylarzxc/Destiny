@@ -163,48 +163,37 @@ document.addEventListener('DOMContentLoaded', () => {
     totalReturnEl.innerHTML = `${fmt(totalReturn)} <span class="unit">(${selectedToken})</span>`;
   });
 
-  // Enable drag-to-scroll on the vertical token selector column. Users can click
-  // and drag the token column to scroll through the list without visible
-  // scrollbars. This mimics the smooth scroll interaction seen on Eternal's
-  // horizontal selector, adapted for our vertical list.
+  // Enable drag-to-scroll for token selector (works for vertical or horizontal)
   const tokenColumn = document.querySelector('.token-column');
   if (tokenColumn) {
     let isDragging = false;
-    let startY;
-    let startScrollTop;
-
-    // For mouse interactions
-    tokenColumn.addEventListener('mousedown', (e) => {
+    let startX = 0, startY = 0;
+    let startScrollLeft = 0, startScrollTop = 0;
+    const axis = () => (tokenColumn.scrollWidth > tokenColumn.clientWidth ? 'x' : 'y');
+    const onDown = (x, y) => {
       isDragging = true;
-      startY = e.clientY;
+      startX = x; startY = y;
+      startScrollLeft = tokenColumn.scrollLeft;
       startScrollTop = tokenColumn.scrollTop;
-      // Prevent text selection while dragging
       tokenColumn.classList.add('no-select');
-    });
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-      tokenColumn.classList.remove('no-select');
-    });
-    document.addEventListener('mousemove', (e) => {
+    };
+    const onMove = (x, y) => {
       if (!isDragging) return;
-      const deltaY = e.clientY - startY;
-      tokenColumn.scrollTop = startScrollTop - deltaY;
-    });
-
-    // For touch interactions on mobile devices
-    tokenColumn.addEventListener('touchstart', (e) => {
-      isDragging = true;
-      startY = e.touches[0].clientY;
-      startScrollTop = tokenColumn.scrollTop;
-    });
-    tokenColumn.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      const deltaY = e.touches[0].clientY - startY;
-      tokenColumn.scrollTop = startScrollTop - deltaY;
-    });
-    tokenColumn.addEventListener('touchend', () => {
-      isDragging = false;
-    });
+      if (axis() === 'x') {
+        tokenColumn.scrollLeft = startScrollLeft - (x - startX);
+      } else {
+        tokenColumn.scrollTop = startScrollTop - (y - startY);
+      }
+    };
+    const onUp = () => { isDragging = false; tokenColumn.classList.remove('no-select'); };
+    // Mouse
+    tokenColumn.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
+    document.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    document.addEventListener('mouseup', onUp);
+    // Touch
+    tokenColumn.addEventListener('touchstart', (e) => onDown(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+    tokenColumn.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+    tokenColumn.addEventListener('touchend', onUp);
   }
 
   // Intersection observer to animate feature cards when they come into view
@@ -281,4 +270,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fallback: show toggle if no leaderboard found
     chatToggle?.classList.add('visible');
   }
+
+  // ------------------------------
+  // Mobile menu (hamburger -> overlay)
+  // ------------------------------
+  const menuToggle = document.getElementById('menuToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuClose = document.getElementById('menuClose');
+  function openMenu() {
+    if (!mobileMenu || !menuToggle) return;
+    mobileMenu.classList.add('open');
+    mobileMenu.setAttribute('aria-hidden', 'false');
+    menuToggle.classList.add('open');
+    menuToggle.setAttribute('aria-expanded', 'true');
+    // Prevent background scroll while menu is open
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    if (!mobileMenu || !menuToggle) return;
+    mobileMenu.classList.remove('open');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    menuToggle.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+  menuToggle?.addEventListener('click', () => {
+    if (mobileMenu?.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  menuClose?.addEventListener('click', closeMenu);
+  // Close menu after clicking a link
+  mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
 });

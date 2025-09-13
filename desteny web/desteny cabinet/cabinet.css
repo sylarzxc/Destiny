@@ -27,7 +27,7 @@
   padding: 0;
 }
 
-body {
+html, body {
   font-family: 'Outfit', sans-serif;
   color: var(--text-color);
   min-height: 100vh;
@@ -35,7 +35,17 @@ body {
   overflow-x: hidden;
 }
 
+/* Remove number input spinners for cleaner UI */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] { -moz-appearance: textfield; }
+
 /* Cosmic background layer; appears behind everything */
+/* Cosmic background layer; appears behind everything */
+body { position: relative; }
 body::before {
   content: '';
   position: fixed;
@@ -45,7 +55,12 @@ body::before {
   height: 100%;
   background: url('assets/cosmic-bg.png') center/cover no-repeat;
   filter: brightness(0.4);
-  z-index: -1;
+  z-index: 0;
+}
+
+/* Hidden by default; shown only on mobile via media query */
+.mobile-topbar {
+  display: none;
 }
 
 /* Primary container using flex to separate sidebar and main area */
@@ -53,6 +68,9 @@ body::before {
   display: flex;
   min-height: 100vh;
   width: 100%;
+  position: relative;
+  /* avoid creating a stacking context that could put overlay above the sidebar */
+  z-index: auto;
 }
 
 /* Sidebar styling */
@@ -662,6 +680,35 @@ body::before {
   color: var(--muted-color);
   white-space: nowrap;
 }
+/* New calculator layout inside deposit-open */
+.calc-box { display:flex; flex-direction:column; gap:.35rem; min-width: 240px; }
+.calc-row { display:flex; align-items: baseline; justify-content: space-between; gap:.5rem; }
+.calc-label { font-size: .8rem; color: var(--muted-color); }
+.calc-value { font-size: 1.2rem; font-weight: 600; }
+.calc-note { font-size: .75rem; color: var(--muted-color); }
+
+/* Desktop layout for deposit action: counters at top-right, button under them (right) */
+@media (min-width: 1024px) {
+  .card.deposit-open .form-action {
+    display: grid;
+    grid-template-columns: 1fr auto; /* left: labels/note, right: values/button */
+    grid-template-rows: auto auto;   /* row1: calc, row2: note+button */
+    align-items: center;
+    gap: .6rem 1.2rem;
+  }
+  .card.deposit-open .form-action .calc-box {
+    grid-column: 1 / -1; /* span both cols, labels left / values right inside */
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: .35rem;
+  }
+  .card.deposit-open .form-action .calc-row { display: contents; }
+  .card.deposit-open .form-action .calc-label { grid-column: 1; justify-self: start; }
+  .card.deposit-open .form-action .calc-value { grid-column: 2; justify-self: end; }
+  .card.deposit-open .form-action .commission-note { grid-column: 1; grid-row: 2; align-self: center; }
+  #depositOpenBtn { grid-column: 2; grid-row: 2; align-self: center; justify-self: end; }
+}
 .commission-note {
   margin-top: 1rem;
   font-size: 0.7rem;
@@ -993,3 +1040,137 @@ body::before {
     padding: 1.2rem 1rem;
   }
 }
+
+/* ============================
+   Responsive: mobile / tablet
+   ============================ */
+
+@media (max-width: 900px) {
+   /* top mobile bar: центрований заголовок, бургер праворуч */
+   .mobile-topbar {
+     position: fixed;
+     top: 0;
+     left: 0;
+     right: 0;
+     height: 56px;
+     display: flex;
+     align-items: center;
+     justify-content: center; /* центр контенту */
+     gap: 12px;
+     padding: 0 12px;
+     background: linear-gradient(90deg, rgba(3,8,18,0.6), rgba(6,11,20,0.6));
+     z-index: 1200;
+      backdrop-filter: blur(6px);
+      justify-content: flex-start !important;
+    }
+   /* кнопка бургеру прижата праворуч */
+   .mobile-topbar .menu-toggle {
+     position: absolute;
+     right: 12px;
+     width: 44px;
+     height: 44px;
+     display: inline-grid;
+     place-items: center;
+     border-radius: 8px;
+     background: rgba(255,255,255,0.03);
+     border: 1px solid rgba(255,255,255,0.04);
+     cursor: pointer;
+   }
+   .mobile-topbar .menu-toggle svg { width:22px; height:22px; color: #fff; }
+
+   /* сховаємо текст у mobile-title — заголовок показуємо в .page-header */
+   .mobile-topbar .mobile-title {
+     display: inline-block;
+      font-size: 1.9rem;
+     font-weight: 700;
+     letter-spacing: 1.5px;
+     background: var(--card-border);
+     background-clip: text;
+     -webkit-background-clip: text;
+     -webkit-text-fill-color: transparent;
+     text-decoration: none;
+      user-select: none;
+      margin-left: 4px;
+    }
+
+   /* hide desktop sidebar, show overlay version (slide-in) */
+   .sidebar {
+     position: fixed;
+     top: 0;
+     left: 0;
+     bottom: 0;
+     width: var(--sidebar-width);
+     transform: translateX(-110%);
+     transition: transform .32s cubic-bezier(.2,.9,.2,1);
+     z-index: 1250;
+     box-shadow: 8px 0 30px rgba(0,0,0,0.6);
+   }
+   body.sidebar-open .sidebar { transform: translateX(0); }
+
+   /* push main content under topbar and reduce horizontal padding */
+   .main-content { padding-top: 72px; padding-left: 1rem; padding-right: 1rem; }
+
+   .mobile-overlay {
+     position: fixed;
+     inset: 0;
+     background: rgba(0,0,0,0.5);
+     opacity: 0;
+     visibility: hidden;
+     transition: opacity .24s;
+     z-index: 1240;
+   }
+   body.sidebar-open .mobile-overlay { opacity: 1; visibility: visible; }
+
+   /* touch-friendly sizes */
+   .nav-item { padding: 0.9rem 1rem; font-size: 1.05rem; gap: 1rem; }
+   .nav-icon { width:24px; height:24px; }
+
+   /* ensure logout stays at bottom */
+   .logout { margin-top: auto; }
+
+   .sidebar-footer { margin-top: 1.25rem; padding-bottom: 1.5rem; }
+
+  /* stack content to single column */
+  .dashboard-grid, .deposit-grid, .receive-grid, .send-grid, .leaderboard-grid, .referrals-grid { display: block; }
+  .card { margin-bottom: 1rem; }
+  /* Ensure deposit wide blocks don't overflow on mobile */
+  .deposit-active { width: 100%; }
+  /* Remove potential horizontal overflow on Send layout */
+  .send-grid { overflow-x: hidden; }
+  .receive-grid { overflow-x: hidden; }
+  .receive-form .address-field { grid-template-columns: 1fr; }
+  .receive-form .address-field .qr-box { grid-column: 1; justify-self: start; }
+  .send-form .address-field { grid-template-columns: 1fr; }
+  /* Make deposit action area vertical on mobile and button at bottom */
+  .deposit-open .form-action { display:flex; flex-direction: column; align-items: stretch; gap: .6rem; }
+  .deposit-open .form-action .calc-box { order: 1; }
+  #depositOpenBtn { order: 3; width: 100%; }
+  .commission-note { order: 4; }
+  /* Header of Active deposits: wrap neatly */
+  .deposit-active .card-header { display:flex; flex-wrap: wrap; gap:.5rem; }
+  .deposit-active .card-header span:first-child { flex: 1 1 auto; }
+  .deposit-active .card-header .header-actions { margin-left:auto; display:flex; gap:.5rem; }
+    .dashboard-grid { margin-top: 15px; }
+    .dashboard-top { margin-top: 15px; }
+
+   .token-balance-grid { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); }
+
+   .main-inner { margin-left: 0; max-width: 100%; }
+
+   /* Центруємо заголовок сторінки на мобайлі/планшеті */
+   .page-header { display:flex; justify-content:center; align-items:center; }
+   .page-header h1 { margin-top: 0.25rem; font-size: 1.35rem; padding-left: 0; text-align: center; }
+
+ }
+
+ @media (max-width: 480px) {
+   .mobile-topbar { height: 56px; padding: 0 10px; }
+   .sidebar { width: 78%; max-width: 320px; }
+   .nav-item { font-size: 1rem; padding: 0.85rem 0.95rem; }
+   .card { padding: 1rem; border-radius: 12px; }
+   .btn-primary { width: 100%; display: block; }
+
+   /* додатково зменшуємо відступ хедера щоб картка визначалася центром */
+   .main-content { padding-top: 68px; }
+   .page-header h1 { font-size: 1.25rem; }
+ }

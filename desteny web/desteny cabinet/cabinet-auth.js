@@ -46,4 +46,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = encodeURI('../desteny/index.html');
     });
   }
+
+  // Populate user name in sidebar greeting
+  try {
+    const uRes = await window.sb.auth.getUser();
+    const user = uRes?.data?.user || session.user;
+    let display = '';
+    // 1) Try profiles.display_name
+    try {
+      const { data: prof } = await window.sb
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
+      if (prof && prof.display_name) display = String(prof.display_name).trim();
+    } catch (_) {}
+    // 2) Fallback to metadata
+    if (!display) {
+      display = (user?.user_metadata?.display_name || user?.user_metadata?.name || '').trim();
+    }
+    // 3) Fallback to email local-part
+    if (!display) {
+      const email = user?.email || '';
+      display = email.includes('@') ? email.split('@')[0] : 'User';
+    }
+    document.querySelectorAll('.user-greeting').forEach((el) => {
+      const nameSpan = el.querySelector('span:last-child');
+      if (nameSpan) nameSpan.textContent = `Hello, ${display}`;
+    });
+  } catch (_) {}
 });

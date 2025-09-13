@@ -11,7 +11,8 @@
     const daysEl = document.getElementById('depositDays');
     const openBtn = document.getElementById('depositOpenBtn');
     const estEl = document.getElementById('depositEstimated');
-    const labelEl = document.getElementById('depositReturnLabel');
+    const dailyEl = document.getElementById('depositDailyIncome');
+    const currencyEl = document.getElementById('depositCurrency');
     const toggleBtns = document.querySelectorAll('.staking-toggle .toggle-btn');
     const activeListContainer = document.querySelector('.deposit-active .card-body');
 
@@ -115,31 +116,39 @@
       return FLEX_MONTHLY_RATE / 30;
     }
 
+    function currencyCode() {
+      return String(currencyEl?.value || 'usdt').toUpperCase();
+    }
+
     function estimate() {
       if (!estEl) return;
       const amount = Number(amountEl?.value || 0);
+      const cur = currencyCode();
       if (!amount || amount <= 0) {
-        estEl.textContent = '0';
-        labelEl && (labelEl.textContent = state.mode === 'flexible' ? 'for selected days' : 'for the entire period');
+        estEl.textContent = `0 ${cur}`;
+        if (dailyEl) dailyEl.textContent = `0 ${cur}`;
         return;
       }
       if (state.mode === 'locked') {
         const plan = getSelectedLockedPlan();
-        if (!plan) { estEl.textContent = '0'; return; }
+        if (!plan) { estEl.textContent = `0 ${cur}`; if (dailyEl) dailyEl.textContent = `0 ${cur}`; return; }
         const days = Number(plan.days || 0);
         const monthly = LOCAL_MONTHLY_RATES[days];
         // If we recognise the duration (30/90/180), use our monthly rules; otherwise fallback to plan.apr
-        const total = (monthly != null)
+        const profit = (monthly != null)
           ? amount * monthly * (days / 30)
           : amount * Number(plan.apr || 0);
-        estEl.textContent = total.toFixed(2);
-        labelEl && (labelEl.textContent = 'for the entire period');
+        const totalPayout = amount + profit;
+        const dailyProfit = days > 0 ? (profit / days) : 0;
+        estEl.textContent = `${totalPayout.toFixed(2)} ${cur}`;
+        if (dailyEl) dailyEl.textContent = `${dailyProfit.toFixed(2)} ${cur}`;
       } else {
         const days = Math.max(1, Number(daysEl?.value || 1));
         const daily = amount * computeDailyFlexibleRate();
-        const total = daily * days;
-        estEl.textContent = total.toFixed(2);
-        labelEl && (labelEl.textContent = `for ${days} day${days === 1 ? '' : 's'}`);
+        const profit = daily * days;
+        const totalPayout = amount + profit;
+        estEl.textContent = `${totalPayout.toFixed(2)} ${cur}`;
+        if (dailyEl) dailyEl.textContent = `${daily.toFixed(2)} ${cur}`;
       }
     }
 
@@ -336,6 +345,7 @@
       estimate();
     });
     daysEl?.addEventListener('input', estimate);
+    currencyEl?.addEventListener('change', estimate);
     toggleBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-target');

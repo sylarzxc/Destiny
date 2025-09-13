@@ -61,11 +61,32 @@
               </svg>
             </a>
           </div>
-          <a href="../desteny register/register.html" class="btn login-btn">Register</a>
-          <a href="../desteny login/login.html" class="btn login-btn">Log in</a>
+          <a href="../desteny register/register.html" class="btn login-btn hide-sm">Register</a>
+          <a href="../desteny login/login.html" class="btn login-btn hide-sm">Log in</a>
+          <!-- Mobile menu toggle -->
+          <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
         </div>
       </nav>
     </header>
+    <!-- Mobile full-screen menu -->
+    <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <div class="mobile-menu-header">
+        <a href="#" class="logo">DESTINY</a>
+        <button class="menu-close" id="menuClose" aria-label="Close menu">
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+      <ul class="mobile-menu-links">
+        <li><a href="../desteny login/login.html">Log in <span class="arrow">↗</span></a></li>
+        <li><a href="../desteny register/register.html">Registration <span class="arrow">↗</span></a></li>
+        <li><a href="#">Docs <span class="arrow">↗</span></a></li>
+      </ul>
+    </aside>
 
     <!--
       Hero section. A twoвЂ‘column layout introduces the concept with a

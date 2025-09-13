@@ -158,6 +158,99 @@ header {
 
 /* The navigation links sit between the brand and the login/social cluster */
 
+/* Utility to hide elements on small screens */
+.hide-sm { display: inline-flex; }
+
+/* Mobile menu toggle (hamburger -> X) */
+.menu-toggle {
+  display: none;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(93, 118, 247, 0.35);
+  background: rgba(13, 27, 42, 0.7);
+  border-radius: 10px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.menu-toggle .bar {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background: #e9ecff;
+  border-radius: 2px;
+  transition: transform 220ms ease, opacity 180ms ease;
+}
+.menu-toggle .bar:nth-child(1) { transform: translateY(-6px); }
+.menu-toggle .bar:nth-child(2) { transform: translateY(0); }
+.menu-toggle .bar:nth-child(3) { transform: translateY(6px); }
+.menu-toggle.open .bar:nth-child(1) { transform: rotate(45deg); }
+.menu-toggle.open .bar:nth-child(2) { opacity: 0; }
+.menu-toggle.open .bar:nth-child(3) { transform: rotate(-45deg); }
+
+/* Mobile full-screen menu overlay */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 28, 0.97);
+  backdrop-filter: blur(6px);
+  transform: translateX(100%);
+  transition: transform 260ms ease;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+}
+.mobile-menu.open { transform: translateX(0); }
+.mobile-menu[aria-hidden="true"] { pointer-events: none; }
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(93,118,247,.2);
+}
+.mobile-menu-header .logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: var(--card-border);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mobile-menu .menu-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(93,118,247,.35);
+  background: rgba(13, 27, 42, 0.7);
+  position: relative;
+  cursor: pointer;
+}
+.mobile-menu .menu-close .bar {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18px; height: 2px;
+  background: #e9ecff;
+  border-radius: 2px;
+}
+.mobile-menu .menu-close .bar:first-child { transform: translate(-50%, -50%) rotate(45deg); }
+.mobile-menu .menu-close .bar:last-child { transform: translate(-50%, -50%) rotate(-45deg); }
+.mobile-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 15rem 1rem;
+}
+.mobile-menu-links a {
+  font-size: 1.05rem;
+  color: #e9ecff;
+  letter-spacing: .5px;
+}
+.mobile-menu-links a .arrow { color: #e67e22; margin-left: .35rem; }
 
 /* Style the login button in the header similar to the previous CTA but
    with its own class. */
@@ -185,13 +278,14 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 36px;
+  height: 36px;
   border-radius: 0.5rem;
   background: rgba(13, 27, 42, 0.8);
   color: var(--text-color);
   font-size: 0.9rem;
   transition: var(--transition-fast);
+  border: 1px solid rgba(93,118,247,0.25);
 }
 
 /* Ensure the icons inside the social buttons are visible on the dark background */
@@ -205,8 +299,8 @@ header {
 
 /* Tune the SVG icons within the social buttons */
 .social-icons svg {
-  width: 1rem;
-  height: 1rem;
+  width: 18px;
+  height: 18px;
   color: var(--text-color);
   fill: currentColor;
 }
@@ -762,6 +856,16 @@ header {
   backdrop-filter: blur(10px);
 }
 
+/* Assign grid areas so we can reorder on phones */
+.calc-left { grid-area: left; }
+.token-column { grid-area: tokens; }
+.duration-panel { grid-area: duration; }
+.calc-panel { grid-area: panel; }
+
+@media (min-width: 901px) {
+  .calc-left, .token-column, .duration-panel, .calc-panel { grid-area: auto / auto / auto / auto; }
+}
+
 /* In flexible mode, let the calculator span across the former duration column */
 .calculator-grid.flexible .calc-panel {
   grid-column: 3 / 5;
@@ -850,6 +954,8 @@ header {
   /* Hide visible scrollbars across browsers */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  /* Mobile framing styles are applied in a media query to avoid
+     altering the desktop appearance. */
 }
 
 /* Hide scrollbars for WebKit-based browsers */
@@ -872,6 +978,35 @@ header {
   height: 40px;
 }
 
+/* Token selector becomes horizontal scroller on tablet/phone */
+@media (max-width: 900px) {
+  .token-column {
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: rgba(13, 27, 42, 0.45);
+    border: 1px solid rgba(93,118,247,.2);
+    border-radius: 12px;
+    padding: 0.35rem 0.5rem;
+  }
+  .token-column .token-list { flex-direction: row; align-items: center; gap: .8rem; }
+  .token-column .token-list li {
+    width: 46px; height: 46px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+}
+
+/* Desktop reset to preserve original look */
+@media (min-width: 901px) {
+  .token-column { background: transparent; border: none; border-radius: 0; padding: 0; }
+  .token-column .token-list { flex-direction: column; }
+  .token-column .token-list li { background: rgba(13, 27, 42, 0.85); border: none; border-radius: 50%; }
+  .duration-panel .period-btn { box-shadow: none; }
+  .staking-toggle .toggle-btn { box-shadow: none; }
+}
+
 .duration-panel .period-btn {
   width: 100%;
   padding: 1.6rem;
@@ -887,6 +1022,7 @@ header {
   gap: 0.3rem;
   cursor: pointer;
   transition: var(--transition-fast);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 14px rgba(5,10,28,0.35);
 }
 
 .duration-panel .period-btn .days-num {
@@ -944,6 +1080,7 @@ header {
   justify-content: center;
   gap: 0.4rem;
   border-radius: calc(var(--border-radius) / 2);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
 }
 
 .staking-toggle .toggle-btn.active {
@@ -1031,6 +1168,7 @@ input[type='number'] {
   padding: 0.8rem 1.6rem;
   font-size: 1rem;
 }
+@media (max-width: 600px) { .btn.large { width: 100%; } }
 
 .stake-main {
   display: flex;
@@ -1104,8 +1242,9 @@ input[type='number'] {
 }
 
 .form-group label {
+  text-align: center;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-top: 5px;
   font-size: 0.9rem;
   color: var(--muted-color);
 }
@@ -1401,7 +1540,7 @@ input[type='number'] {
 
 /* Roadmap section */
 .roadmap-section {
-  padding: 5rem 0;
+  padding: 2rem 0;
 }
 
 .roadmap-list {
@@ -1495,6 +1634,7 @@ input[type='number'] {
   }
   .calculator-grid {
     grid-template-columns: 1fr;
+    padding: 1.2rem;
   }
   .duration-panel {
     flex-direction: row;
@@ -1504,9 +1644,14 @@ input[type='number'] {
   .duration-panel .period-btn {
     padding: 0.8rem;
   }
+  /* Header on tablets */
+  .menu-toggle { display: inline-flex; }
+  .hide-sm { display: none !important; }
+  .nav-links { display: none; }
 }
 
 @media (max-width: 600px) {
+
   .hero-inner {
     flex-direction: column;
     align-items: flex-start;
@@ -1514,12 +1659,72 @@ input[type='number'] {
   .hero-graphic {
     align-items: flex-start;
   }
-  .nav-links {
-    display: none; /* Hide navigation on small screens for simplicity */
+  /* Hide hero text completely on phones */
+  .hero-text { display: none !important; }
+  /* Hide tagline near the logo on phones */
+  .tagline { display: none !important; }
+  .nav-links { display: none; }
+  .menu-toggle { display: inline-flex; }
+  .hide-sm { display: none !important; }
+  .nav { justify-content: space-between; }
+  .hero-invest .invest-heading { font-size: 2rem; }
+  .hero-invest .invest-value { font-size: 2.2rem; }
+
+  /* Calculator: reorganize for phone */
+  .calculator-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "left"
+      "tokens"
+      "duration"
+      "panel";
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
   }
-  .nav {
-    justify-content: space-between;
+  /* In flexible mode on phones, drop the empty duration row entirely */
+  .calculator-grid.flexible {
+    grid-template-areas:
+      "left"
+      "tokens"
+      "panel";
   }
+  .calculator-grid.flexible .calc-panel {
+    grid-column: auto !important; /* override desktop rule 3/5 */
+    grid-area: panel;
+    padding: .85rem;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .calculator-grid.flexible #lockedDurationPanel,
+  .calculator-grid.flexible .duration-panel { display: none !important; }
+  .calculator-grid.flexible .staking-toggle { margin-top: .25rem; }
+  .calc-left h2 { font-size: clamp(1.6rem, 6.2vw, 2.2rem); }
+  .calc-left p { font-size: 0.95rem; max-width: none; }
+  .calc-left .calc-features { display: none; }
+  .token-column { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0.2rem; }
+  /* Token row: only a bottom border like a track */
+  .token-column { background: transparent; border: none;  }
+  .token-column .token-list { flex-direction: row; gap: 0.6rem; }
+  .token-column .token-list li { width: 40px; height: 40px; }
+  .duration-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+  .duration-panel .period-btn { padding: 0.9rem; }
+  .duration-panel .period-btn .days-num { font-size: 1.6rem; }
+  .duration-panel .period-btn .days-label { font-size: 0.75rem; }
+  /* Compress calc panel and remove its border while keeping content readable */
+  .calc-panel { display: block; padding: .85rem; border: none; background: rgba(13, 27, 42, 0.4); box-shadow: none; }
+  .calculator-grid.flexible .calc-panel { box-shadow: none; }
+ 
+  .staking-toggle .toggle-btn { padding: 0.7rem; font-size: 0.85rem; }
+  .calc-panel input { padding: 0.75rem; }
+  .return-summary.large {flex-direction: row;}
+  .return-summary { flex-direction: column; gap: 0.8rem; }
+  .return-summary.large .return-value { font-size: 1.8rem; }
+  /* Flexible mode: show only total, add caption */
+  .calculator-grid.flexible .return-summary { gap: 0.6rem; }
+  .calculator-grid.flexible .return-summary .return-item:first-child { display: none; }
+  .calculator-grid.flexible .return-summary .return-item:last-child .return-caption { display: block; font-size: 0.85rem; color: var(--muted-color); }
 }
 
 /* ==================================================================== */
@@ -1678,7 +1883,7 @@ input[type='number'] {
   borders add a premium feel.
 */
 .leaderboard-section {
-  padding: 5rem 0;
+  
   background: var(--bg-color);
 }
 
@@ -1752,6 +1957,27 @@ input[type='number'] {
 .leaderboard-list::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #5d76f7, #9c48ec);
   border-radius: 4px;
+}
+
+/* Mobile: make leaderboard monolithic (no card bg/border, no row striping) */
+@media (max-width: 600px) {
+  .leaderboard-card { background: transparent; border: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+  .leaderboard-item:nth-child(odd) { background: transparent; }
+}
+
+/* Leaderboard responsive columns */
+@media (max-width: 700px) {
+  .leaderboard-header,
+  .leaderboard-item { grid-template-columns: .9fr 2.2fr 1.1fr; }
+  .leaderboard-header span:nth-child(4),
+  .leaderboard-item span:nth-child(4) { display: none; }
+}
+@media (max-width: 480px) {
+  .hero{
+    min-height: 55vh;
+  }
+  .leaderboard-header,
+  .leaderboard-item { font-size: .8rem; }
 }
 
 /*
