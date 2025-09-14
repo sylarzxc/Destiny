@@ -33,9 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pass !== repeat) return showError('Паролі не співпадають');
     if (!window.sb) return showError('Auth ще не налаштовано. Перевір env.js');
 
-    const redirectUrl = (window.location && window.location.origin)
-      ? (window.location.origin + '/desteny%20web/desteny%20cabinet/dashboard.html')
-      : undefined;
+    // Build absolute URL to dashboard relative to the current page.
+    // Works on GitHub Pages repo subpath and on localhost.
+    let redirectUrl;
+    try {
+      redirectUrl = new URL('../desteny cabinet/dashboard.html', window.location.href).toString();
+    } catch (_) {
+      redirectUrl = undefined;
+    }
 
     const { data, error } = await window.sb.auth.signUp({
       email,
@@ -95,7 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Якщо акаунт вже підтверджений/автопідтверджений — редірект у кабінет
-    const dashboardPath = encodeURI('../desteny cabinet/dashboard.html');
-    window.location.href = dashboardPath;
+    try {
+      const dashboardPath = new URL('../desteny cabinet/dashboard.html', window.location.href).toString();
+      window.location.href = dashboardPath;
+    } catch (_) {
+      window.location.href = encodeURI('../desteny cabinet/dashboard.html');
+    }
   });
 });

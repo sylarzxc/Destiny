@@ -35,8 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ], { duration: 300, iterations: 1 });
       return;
     }
-    const dashboardPath = encodeURI('../desteny cabinet/dashboard.html');
-    window.location.href = dashboardPath;
+    try {
+      const dashboardPath = new URL('../desteny cabinet/dashboard.html', window.location.href).toString();
+      window.location.href = dashboardPath;
+    } catch (_) {
+      window.location.href = encodeURI('../desteny cabinet/dashboard.html');
+    }
   }
 
   form.addEventListener('submit', (e) => {
@@ -46,4 +50,3 @@ document.addEventListener('DOMContentLoaded', () => {
     doLogin(email.trim(), password);
   });
 });
-
