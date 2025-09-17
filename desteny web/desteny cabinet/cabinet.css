@@ -408,13 +408,13 @@ body.is-admin .nav-item.nav-admin { display: flex; }
   position: relative;
   padding-bottom: 1.1rem; /* reserve room for a one-line hint */
 }
-.deposit-form .form-field .form-hint { position: absolute; left: 0; bottom: 0; margin-top: 0; }
+.deposit-form .form-field .form-hint { position: absolute; left: 0; bottom: -1.2rem; margin-top: 0; }
 
 /* On mobile place hints in normal flow so they don't overlap */
 @media (max-width: 900px) {
   /* Keep hints positioned absolutely but reserve space for them to avoid shifting */
   .deposit-form .form-field { padding-bottom: 1.1rem; }
-  .deposit-form .form-field .form-hint { position: absolute; left: 0; bottom: 0; }
+  .deposit-form .form-field .form-hint { position: absolute; left: 0; bottom: -1.2rem; }
 
   /* Recent activity table readability on mobile */
   .card-activity .table-container th,

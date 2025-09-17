@@ -117,6 +117,13 @@
       return FLEX_MONTHLY_RATE / 30;
     }
 
+    // Calculate compound monthly returns for locked staking
+    function calculateCompoundReturn(amount, days, monthlyRate) {
+      const months = days / 30;
+      const totalRate = Math.pow(1 + monthlyRate, months) - 1;
+      return amount * totalRate;
+    }
+
     function currencyCode() {
       return String(currencyEl?.value || 'usdt').toUpperCase();
     }
@@ -135,9 +142,9 @@
         if (!plan) { estEl.textContent = `0 ${cur}`; if (dailyEl) dailyEl.textContent = `0 ${cur}`; return; }
         const days = Number(plan.days || 0);
         const monthly = LOCAL_MONTHLY_RATES[days];
-        // If we recognise the duration (30/90/180), use our monthly rules; otherwise fallback to plan.apr
+        // If we recognise the duration (30/90/180), use compound calculation; otherwise fallback to plan.apr
         const profit = (monthly != null)
-          ? amount * monthly * (days / 30)
+          ? calculateCompoundReturn(amount, days, monthly)
           : amount * Number(plan.apr || 0);
         const totalPayout = amount + profit;
         const dailyProfit = days > 0 ? (profit / days) : 0;
@@ -339,23 +346,38 @@
 
     // Reset all deposits (test only)
     document.getElementById('btnResetDeposits')?.addEventListener('click', async (ev) => {
+      console.log('Reset button clicked');
       if (!confirm('Delete ALL your deposits? (test only)')) return;
       const btn = ev.currentTarget;
       try { btn.disabled = true; btn.textContent = 'Resetting…'; } catch {}
+      
+      console.log('DEMO_LOCAL_DELETE:', DEMO_LOCAL_DELETE);
+      console.log('Session user ID:', session?.user?.id);
+      
       if (DEMO_LOCAL_DELETE) {
         sessionStorage.setItem('demoHiddenStakes', 'ALL');
         await renderActiveStakesNew();
         try { btn.disabled = false; btn.textContent = 'Reset'; } catch {}
         return;
       }
-      const { error: delErr } = await window.sb
-        .from('stakes')
-        .delete()
-        .eq('user_id', session.user.id);
-      if (delErr) {
-        console.warn('Reset deposits error:', delErr);
-        alert(delErr.message || 'Failed to reset');
+      
+      try {
+        const { error: delErr } = await window.sb
+          .from('stakes')
+          .delete()
+          .eq('user_id', session.user.id);
+        if (delErr) {
+          console.warn('Reset deposits error:', delErr);
+          alert(delErr.message || 'Failed to reset');
+        } else {
+          console.log('Deposits deleted successfully');
+          alert('All deposits deleted successfully!');
+        }
+      } catch (err) {
+        console.error('Reset error:', err);
+        alert('Error: ' + (err.message || 'Unknown error'));
       }
+      
       await renderActiveStakesNew();
       try { btn.disabled = false; btn.textContent = 'Reset'; } catch {}
     });
@@ -459,7 +481,7 @@
         const plan = getSelectedLockedPlan();
         const days = Number(plan?.days || 0);
         const monthly = {30:0.075, 90:0.105, 180:0.125}[days];
-        const profit = (monthly != null) ? amount * monthly * (days/30) : amount * Number(plan?.apr || 0);
+        const profit = (monthly != null) ? calculateCompoundReturn(amount, days, monthly) : amount * Number(plan?.apr || 0);
         daily = days>0 ? profit/days : 0; total = amount + profit;
         cfType.textContent = `Locked`;
         cfTerm.textContent = `${days} days`;

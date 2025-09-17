@@ -156,14 +156,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const monthlyRates = { 30: 0.075, 90: 0.105, 180: 0.125 };
     const dailyRateFlexible = 0.045 / 30;
-    const totalRate = (flexibleActive)
-      ? dailyRateFlexible * days
-      : ((monthlyRates[days] || 0) * (days / 30));
+    
+    // Calculate compound monthly returns for locked staking
+    let totalRate = 0;
+    if (flexibleActive) {
+      totalRate = dailyRateFlexible * days;
+    } else {
+      const monthlyRate = monthlyRates[days] || 0;
+      const months = days / 30;
+      // Compound calculation: each month earns the monthly rate on the accumulated amount
+      totalRate = Math.pow(1 + monthlyRate, months) - 1;
+    }
 
     const dailyReturn = flexibleActive
       ? (amount * dailyRateFlexible)
       : (amount * totalRate) / days;
-    const totalReturn = amount * (flexibleActive ? dailyRateFlexible * days : totalRate);
+    const totalReturn = amount * totalRate;
 
     const fmt = (v) => (Math.abs(v) < 0.01 ? v.toFixed(4) : v.toFixed(2));
     if (dailyReturnEl) dailyReturnEl.innerHTML = `${fmt(dailyReturn)} <span class="unit">(${selectedToken})</span>`;

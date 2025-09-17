@@ -13,6 +13,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const form = document.querySelector('.auth-form');
   if (!form) return;
+  // Progressive hints: show only on invalid input or blur
+  const emailInput = document.getElementById('register-mail');
+  const loginInput = document.getElementById('register-login');
+  const passInput = document.getElementById('register-password');
+  const repeatInput = document.getElementById('register-repeat');
+
+  function toggle(el, show) { if (!el) return; el.style.display = show ? 'block' : 'none'; }
+
+  emailInput?.addEventListener('blur', () => {
+    const v = emailInput.value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    toggle(document.getElementById('hint-email'), !ok);
+  });
+  passInput?.addEventListener('input', () => {
+    const v = passInput.value;
+    const ok = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-={}\[\]:;"'<>,.?/]{8,64}$/.test(v);
+    toggle(document.getElementById('hint-password'), !ok && v.length > 0);
+  });
+  repeatInput?.addEventListener('input', () => {
+    const same = repeatInput.value === passInput.value;
+    toggle(document.getElementById('hint-repeat'), !same && repeatInput.value.length > 0);
+  });
+  loginInput?.addEventListener('blur', () => {
+    const ok = (loginInput.value || '').trim().length >= 2;
+    toggle(document.getElementById('hint-login'), !ok);
+  });
+
 
   let errorEl = document.querySelector('.auth-error');
   if (!errorEl) {
@@ -39,7 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const pass = (document.getElementById('register-password') || {}).value || '';
     const repeat = (document.getElementById('register-repeat') || {}).value || '';
 
+    // Basic client-side validation (email + password strength)
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    if (!emailOk) return showError('Вкажіть дійсну адресу email.');
     if (pass !== repeat) return showError('Паролі не співпадають');
+    // 8–64 символів, хоча б 1 літера та 1 цифра
+    const passOk = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-={}\[\]:;"'<>,.?/]{8,64}$/.test(pass);
+    if (!passOk) return showError('Пароль має містити 8–64 символів, принаймні 1 букву і 1 цифру.');
     if (!window.sb) return showError('Auth ще не налаштовано. Перевір env.js');
 
     // Build absolute URL to dashboard relative to the current page.

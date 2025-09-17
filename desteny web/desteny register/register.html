@@ -41,36 +41,54 @@
             type="email"
             id="register-mail"
             name="mail"
-            placeholder="Mail"
+            placeholder="Email address"
+            autocomplete="email"
+            aria-describedby="hint-email"
             required
           />
+          <div id="hint-email" style="display:none;margin-top:-.6rem;margin-bottom:.6rem;color:#9aa3c7;font-size:.9rem;">Use a real email to receive a confirmation link.</div>
+
           <input
             type="text"
             id="register-login"
             name="login"
-            placeholder="Login"
+            placeholder="Display name"
+            autocomplete="nickname"
+            aria-describedby="hint-login"
             required
           />
+          <div id="hint-login" style="display:none;margin-top:-.6rem;margin-bottom:.6rem;color:#9aa3c7;font-size:.9rem;">Public name shown in the app. You can change it later.</div>
+
           <input
             type="password"
             id="register-password"
             name="password"
-            placeholder="Password"
+            placeholder="Password (8–64 chars, letters and numbers)"
+            autocomplete="new-password"
+            aria-describedby="hint-password"
             required
           />
+          <div id="hint-password" style="display:none;margin-top:-.6rem;margin-bottom:.6rem;color:#9aa3c7;font-size:.9rem;">Minimum 8 characters. Must include at least 1 letter and 1 number.</div>
+
           <input
             type="password"
             id="register-repeat"
             name="repeat_password"
-            placeholder="Repeat Password"
+            placeholder="Repeat password"
+            autocomplete="new-password"
+            aria-describedby="hint-repeat"
             required
           />
+          <div id="hint-repeat" style="display:none;margin-top:-.6rem;margin-bottom:.6rem;color:#9aa3c7;font-size:.9rem;">Repeat your password to avoid typos.</div>
+
           <input
             type="text"
             id="register-promo"
             name="promo"
-            placeholder="Promocode (optional)"
+            placeholder="Promo code (optional)"
+            aria-describedby="hint-promo"
           />
+          <div id="hint-promo" style="display:none;margin-top:-.6rem;margin-bottom:.6rem;color:#9aa3c7;font-size:.9rem;">If you have a referral or promo code, paste it here.</div>
           <button type="submit" class="auth-btn">Register Account</button>
           <p class="auth-alt">
             Already have an account?

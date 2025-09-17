@@ -364,6 +364,69 @@
       console.warn('Failed to load active stakes', err);
     }
   }
+
+  // Add funds functionality
+  document.getElementById('addFundsBtn')?.addEventListener('click', async () => {
+    const amount = prompt('Enter amount to add (USDT):', '500');
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+    
+    try {
+      // Get current session
+      const currentSession = await window.authHelpers.session();
+      if (!currentSession) {
+        alert('Please log in first');
+        return;
+      }
+      
+      // Direct wallet update instead of RPC
+      const { data: existingWallet, error: fetchError } = await window.sb
+        .from('wallets')
+        .select('available')
+        .eq('user_id', currentSession.user.id)
+        .eq('currency', 'USDT')
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+      
+      const currentBalance = Number(existingWallet?.available || 0);
+      const newBalance = currentBalance + Number(amount);
+      
+      const { error: upsertError } = await window.sb
+        .from('wallets')
+        .upsert({
+          user_id: currentSession.user.id,
+          currency: 'USDT',
+          available: newBalance,
+          locked: existingWallet?.locked || 0,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (upsertError) throw upsertError;
+      
+      // Add transaction record
+      await window.sb
+        .from('transactions')
+        .insert({
+          user_id: currentSession.user.id,
+          type: 'deposit',
+          amount: Number(amount),
+          meta: { source: 'manual_credit', note: 'Added via dashboard' }
+        });
+      
+      alert(`Successfully added ${amount} USDT to your balance!`);
+      // Refresh balances
+      await initBalances(currentSession.user.id);
+    } catch (err) {
+      console.error('Add funds error:', err);
+      alert('Failed to add funds: ' + (err.message || 'Unknown error'));
+    }
+  });
+
 })();
 
 

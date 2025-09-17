@@ -21,59 +21,71 @@
         <a href="../desteny/index.html" class="nav-item logout"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18"><path d="M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Log Out</span></a>
         <div class="sidebar-footer"><p>Copyright &copy; 2025<br/>Destiny<br/>All rights reserved</p></div>
       </aside>
-      <main class="main-content">
-        <header class="page-header"><h1>Admin</h1></header>
+      <main class="main-content" aria-label="Admin dashboard">
+        <header class="page-header">
+          <div>
+            <h1>Admin</h1>
+            <div style="color:#8a8fa7; font-size:.95rem; margin-top:.25rem;">Moderate requests, manage users and deposits, adjust settings.</div>
+          </div>
+        </header>
 
-        <section class="admin-summary-grid">
-          <div class="summary-card">
+        <!-- Overview KPI row -->
+        <section class="admin-summary-grid" aria-label="Overview metrics">
+          <div class="summary-card" aria-label="Users total">
             <div class="summary-label">Users</div>
             <div class="summary-value" id="metricTotalUsers">0</div>
             <div class="summary-sub">Pending approvals: <span id="metricPendingRequests">0</span></div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" aria-label="System wallets">
             <div class="summary-label">Wallet balance</div>
             <div class="summary-value" id="metricTotalAvailable">$0.00</div>
             <div class="summary-sub">Locked: <span id="metricTotalLocked">$0.00</span></div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" aria-label="Active deposits">
             <div class="summary-label">Active deposits</div>
             <div class="summary-value" id="metricActiveStakes">0</div>
             <div class="summary-sub">Total value: <span id="metricActiveValue">$0.00</span></div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" aria-label="Expiring soon">
             <div class="summary-label">Expiring &lt; 24h</div>
             <div class="summary-value" id="metricExpiring">0</div>
             <div class="summary-sub">Renew expiring stakes in time</div>
           </div>
         </section>
 
+        <!-- Content sections -->
         <div class="leaderboard-grid">
-          <div class="card span-all">
+          <!-- Pending requests -->
+          <div class="card span-all" aria-labelledby="pending-title">
             <div class="card-header">
-              <span>Pending requests</span>
+              <div>
+                <span id="pending-title">Pending requests</span>
+                <div style="color:#8a8fa7; font-size:.85rem;">Approve or reject deposits/withdrawals waiting for review.</div>
+              </div>
               <div class="pagination">
                 <span class="status-pill" id="adCount">0 open</span>
-                <button class="page-btn" id="adPrev">Prev</button>
+                <button class="page-btn" id="adPrev" aria-label="Previous page">Prev</button>
                 <span class="page-info" id="adInfo">Page 1</span>
-                <button class="page-btn" id="adNext">Next</button>
+                <button class="page-btn" id="adNext" aria-label="Next page">Next</button>
               </div>
             </div>
             <div class="card-toolbar">
-              <input id="adSearch" placeholder="Search email / asset / type" />
-              <select id="adTypeFilter">
+              <input id="adSearch" placeholder="Search email / asset / type" aria-label="Search pending" />
+              <select id="adTypeFilter" aria-label="Filter by type">
                 <option value="">All</option>
                 <option value="deposit">Deposit</option>
                 <option value="withdraw">Withdraw</option>
               </select>
+              <div style="flex:1"></div>
               <button class="page-btn" id="adRefresh">Refresh</button>
               <button class="page-btn" id="adApproveSel">Approve selected</button>
               <button class="page-btn" id="adRejectSel">Reject selected</button>
             </div>
             <div class="table-container">
-              <table>
+              <table aria-label="Pending requests table">
                 <thead>
                   <tr>
-                    <th></th>
+                    <th style="width:28px"></th>
                     <th>Date</th>
                     <th>User</th>
                     <th>Type</th>
@@ -89,26 +101,31 @@
             </div>
           </div>
 
-          <div class="card span-all">
+          <!-- Users -->
+          <div class="card span-all" aria-labelledby="users-title">
             <div class="card-header">
-              <span>Users</span>
+              <div>
+                <span id="users-title">Users</span>
+                <div style="color:#8a8fa7; font-size:.85rem;">Manage roles, balances and view user details.</div>
+              </div>
               <div class="pagination">
-                <button class="page-btn" id="uPrev">Prev</button>
+                <button class="page-btn" id="uPrev" aria-label="Previous page">Prev</button>
                 <span class="page-info" id="uInfo">Page 1</span>
-                <button class="page-btn" id="uNext">Next</button>
+                <button class="page-btn" id="uNext" aria-label="Next page">Next</button>
               </div>
             </div>
             <div class="card-toolbar">
-              <input id="uSearch" placeholder="Search email / name" />
-              <select id="uRoleFilter">
+              <input id="uSearch" placeholder="Search email / name" aria-label="Search users" />
+              <select id="uRoleFilter" aria-label="Filter by role">
                 <option value="">All roles</option>
                 <option value="admin">Admin</option>
                 <option value="user">User</option>
               </select>
+              <div style="flex:1"></div>
               <button class="page-btn" id="uRefresh">Refresh</button>
             </div>
             <div class="table-container">
-              <table>
+              <table aria-label="Users table">
                 <thead>
                   <tr>
                     <th>User</th>
@@ -126,27 +143,32 @@
             </div>
           </div>
 
-          <div class="card span-all">
+          <!-- Active deposits -->
+          <div class="card span-all" aria-labelledby="stakes-title">
             <div class="card-header">
-              <span>Active deposits</span>
+              <div>
+                <span id="stakes-title">Active deposits</span>
+                <div style="color:#8a8fa7; font-size:.85rem;">Monitor live stakes and force-close if needed.</div>
+              </div>
               <div class="pagination">
-                <button class="page-btn" id="stPrev">Prev</button>
+                <button class="page-btn" id="stPrev" aria-label="Previous page">Prev</button>
                 <span class="page-info" id="stInfo">Page 1</span>
-                <button class="page-btn" id="stNext">Next</button>
+                <button class="page-btn" id="stNext" aria-label="Next page">Next</button>
               </div>
             </div>
             <div class="card-toolbar">
-              <input id="stSearch" placeholder="Search stake / user" />
-              <select id="stStatusFilter">
+              <input id="stSearch" placeholder="Search stake / user" aria-label="Search stakes" />
+              <select id="stStatusFilter" aria-label="Filter by status">
                 <option value="">All statuses</option>
                 <option value="active">Active</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+              <div style="flex:1"></div>
               <button class="page-btn" id="stRefresh">Refresh</button>
             </div>
             <div class="table-container">
-              <table>
+              <table aria-label="Active deposits table">
                 <thead>
                   <tr>
                     <th>Stake</th>
@@ -164,15 +186,19 @@
             </div>
           </div>
 
-          <div class="card span-all">
+          <!-- Admin activity log -->
+          <div class="card span-all" aria-labelledby="log-title">
             <div class="card-header">
-              <span>Admin activity log</span>
+              <div>
+                <span id="log-title">Admin activity log</span>
+                <div style="color:#8a8fa7; font-size:.85rem;">Recent privileged actions performed by administrators.</div>
+              </div>
               <div class="card-header-actions">
                 <button class="page-btn" id="logRefresh">Refresh</button>
               </div>
             </div>
             <div class="table-container">
-              <table>
+              <table aria-label="Admin log table">
                 <thead>
                   <tr>
                     <th>When</th>
@@ -187,10 +213,13 @@
             </div>
           </div>
 
-          <div class="card span-all">
+          <!-- Settings -->
+          <div class="card span-all" aria-labelledby="settings-title">
             <div class="card-header">
-              <span>Settings</span>
-              <div></div>
+              <div>
+                <span id="settings-title">Settings</span>
+                <div style="color:#8a8fa7; font-size:.85rem;">Operational parameters. JSON is validated on save.</div>
+              </div>
             </div>
             <div class="card-body" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
               <div>
