@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Destiny – Deposit</title>
+    <title>Destiny вЂ“ Deposit</title>
     <link
       rel="preconnect"
       href="https://fonts.googleapis.com"
@@ -91,13 +91,18 @@
             <span>Support</span>
             <svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
+                  <a href="admin.html" class="nav-item nav-admin">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span>Admin</span>
+            <svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </nav>
         <a href="../desteny/index.html" class="nav-item logout">
           <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Log Out</span>
         </a>
         <div class="sidebar-footer">
-          <p>Copyright © 2025<br />Destiny<br />All rights reserved</p>
+          <p>Copyright В© 2025<br />Destiny<br />All rights reserved</p>
         </div>
       </aside>
       <main class="main-content">
@@ -124,6 +129,7 @@
                 <div class="form-field">
                   <label>Amount</label>
                   <input id="depositAmount" type="number" placeholder="e.g. 2000" min="0" />
+                  <div id="depositAmountNote" class="form-hint" style="display:none"></div>
                 </div>
                 <div class="form-field">
                   <label>Currency</label>
@@ -183,6 +189,26 @@
         </div>
       </main>
     </div>
+    <!-- Confirm deposit modal -->
+    <div id="depositConfirm" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal" role="document">
+        <div class="modal-header">
+          <div class="modal-title">Confirm deposit</div>
+          <button class="btn-secondary" id="confirmClose" aria-label="Close">вњ•</button>
+        </div>
+        <div class="modal-body">
+          <div class="label">Type</div><div class="value" id="cfType">Locked</div>
+          <div class="label">Amount</div><div class="value" id="cfAmount">0 USDT</div>
+          <div class="label">Term</div><div class="value" id="cfTerm">30 days</div>
+          <div class="label">Daily income</div><div class="value" id="cfDaily">0 USDT</div>
+          <div class="label">Total to receive</div><div class="value" id="cfTotal">0 USDT</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="confirmCancel">Cancel</button>
+          <button class="btn-primary" id="confirmSubmit">Confirm</button>
+        </div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <script src="../desteny/env.js"></script>
     <script src="../desteny/supabaseClient.js"></script>
@@ -191,3 +217,4 @@
     <script src="deposit.js"></script>
   </body>
 </html>
+

@@ -1,5 +1,11 @@
 // Guard cabinet pages: require Supabase session; handle logout click
 document.addEventListener('DOMContentLoaded', async () => {
+  // Clear any hardcoded placeholder name immediately to avoid flicker
+  try {
+    document.querySelectorAll('.user-greeting span:last-child').forEach((el) => {
+      el.textContent = 'Hello,';
+    });
+  } catch (_) {}
   // If Supabase is not configured yet, skip guarding to avoid blocking local dev
   if (!window.authHelpers) return;
   const loginHref = encodeURI('../desteny login/login.html');
@@ -74,5 +80,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       const nameSpan = el.querySelector('span:last-child');
       if (nameSpan) nameSpan.textContent = `Hello, ${display}`;
     });
+
+    // Add Admin link for admin users
+    try {
+      const { data: prof } = await window.sb
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      const role = (prof?.role ? String(prof.role) : '').trim().toLowerCase();
+      if (role === 'admin') {
+        window.__isAdmin = true;
+        document.body.classList?.add('is-admin');
+        const nav = document.querySelector('.sidebar .sidebar-nav');
+        if (nav && !nav.querySelector('a[href="admin.html"]')) {
+          const a = document.createElement('a');
+          a.href = 'admin.html';
+          a.className = 'nav-item';
+          a.innerHTML = `
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M3 12h18M3 6h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.6" />
+            </svg>
+            <span>Admin</span>
+            <svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+          nav.appendChild(a);
+        }
+      }
+    } catch (_) {}
   } catch (_) {}
 });

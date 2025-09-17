@@ -1,7 +1,16 @@
-// Supabase-driven register
+﻿// Supabase-driven register
 console.log('Destiny register page loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      localStorage.setItem('destiny_pending_referral', refCode);
+    }
+  } catch (err) {
+    console.warn('Referral param capture failed', err);
+  }
   const form = document.querySelector('.auth-form');
   if (!form) return;
 
@@ -82,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', async (ev) => {
         ev.preventDefault();
         try {
-          const r = await window.sb.auth.resend({ type: 'signup', email });
+          const r = await window.sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: redirectUrl } });
           if (r.error) throw r.error;
           link.textContent = 'Email sent again';
           link.style.pointerEvents = 'none';

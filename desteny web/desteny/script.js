@@ -8,7 +8,7 @@
   reflect actual financial products or advice.
 */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params = new URLSearchParams(window.location.search);\n    const refCode = params.get('ref');\n    if (refCode) {\n      localStorage.setItem('destiny_pending_referral', refCode);\n      if (typeof window.history?.replaceState === 'function') {\n        const url = new URL(window.location.href);\n        url.searchParams.delete('ref');\n        window.history.replaceState({}, document.title, url.toString());\n      }\n    }\n  } catch (err) {\n    console.warn('Failed to process referral param', err);\n  }\n\n
   // ------------------------------
   // Token selection & symbol tags
   // ------------------------------

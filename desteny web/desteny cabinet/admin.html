@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Destiny - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="cabinet.css" />
+  </head>
+  <body>
+    <div class="cabinet-container">
+      <aside class="sidebar">
+        <div class="sidebar-header"><a href="../desteny/index.html" class="sidebar-logo">DESTINY</a></div>
+        <div class="user-greeting"><span class="avatar-placeholder"></span><span>Hello, Admin</span></div>
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg><span>Dashboard</span><svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="admin.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Admin</span><svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </nav>
+        <a href="../desteny/index.html" class="nav-item logout"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18"><path d="M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Log Out</span></a>
+        <div class="sidebar-footer"><p>Copyright &copy; 2025<br/>Destiny<br/>All rights reserved</p></div>
+      </aside>
+      <main class="main-content">
+        <header class="page-header"><h1>Admin</h1></header>
+
+        <section class="admin-summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">Users</div>
+            <div class="summary-value" id="metricTotalUsers">0</div>
+            <div class="summary-sub">Pending approvals: <span id="metricPendingRequests">0</span></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Wallet balance</div>
+            <div class="summary-value" id="metricTotalAvailable">$0.00</div>
+            <div class="summary-sub">Locked: <span id="metricTotalLocked">$0.00</span></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Active deposits</div>
+            <div class="summary-value" id="metricActiveStakes">0</div>
+            <div class="summary-sub">Total value: <span id="metricActiveValue">$0.00</span></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Expiring &lt; 24h</div>
+            <div class="summary-value" id="metricExpiring">0</div>
+            <div class="summary-sub">Renew expiring stakes in time</div>
+          </div>
+        </section>
+
+        <div class="leaderboard-grid">
+          <div class="card span-all">
+            <div class="card-header">
+              <span>Pending requests</span>
+              <div class="pagination">
+                <span class="status-pill" id="adCount">0 open</span>
+                <button class="page-btn" id="adPrev">Prev</button>
+                <span class="page-info" id="adInfo">Page 1</span>
+                <button class="page-btn" id="adNext">Next</button>
+              </div>
+            </div>
+            <div class="card-toolbar">
+              <input id="adSearch" placeholder="Search email / asset / type" />
+              <select id="adTypeFilter">
+                <option value="">All</option>
+                <option value="deposit">Deposit</option>
+                <option value="withdraw">Withdraw</option>
+              </select>
+              <button class="page-btn" id="adRefresh">Refresh</button>
+              <button class="page-btn" id="adApproveSel">Approve selected</button>
+              <button class="page-btn" id="adRejectSel">Reject selected</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Asset</th>
+                    <th>Asset amount</th>
+                    <th>USD amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adBody"><tr><td colspan="9">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card span-all">
+            <div class="card-header">
+              <span>Users</span>
+              <div class="pagination">
+                <button class="page-btn" id="uPrev">Prev</button>
+                <span class="page-info" id="uInfo">Page 1</span>
+                <button class="page-btn" id="uNext">Next</button>
+              </div>
+            </div>
+            <div class="card-toolbar">
+              <input id="uSearch" placeholder="Search email / name" />
+              <select id="uRoleFilter">
+                <option value="">All roles</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+              <button class="page-btn" id="uRefresh">Refresh</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Available</th>
+                    <th>Locked</th>
+                    <th>Active stakes</th>
+                    <th>Pending</th>
+                    <th>Next maturity</th>
+                    <th>Last activity</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="uBody"><tr><td colspan="8">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card span-all">
+            <div class="card-header">
+              <span>Active deposits</span>
+              <div class="pagination">
+                <button class="page-btn" id="stPrev">Prev</button>
+                <span class="page-info" id="stInfo">Page 1</span>
+                <button class="page-btn" id="stNext">Next</button>
+              </div>
+            </div>
+            <div class="card-toolbar">
+              <input id="stSearch" placeholder="Search stake / user" />
+              <select id="stStatusFilter">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="page-btn" id="stRefresh">Refresh</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stake</th>
+                    <th>User</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Ends</th>
+                    <th>Timer</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="stBody"><tr><td colspan="8">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card span-all">
+            <div class="card-header">
+              <span>Admin activity log</span>
+              <div class="card-header-actions">
+                <button class="page-btn" id="logRefresh">Refresh</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>Admin</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody id="logBody"><tr><td colspan="5">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card span-all">
+            <div class="card-header">
+              <span>Settings</span>
+              <div></div>
+            </div>
+            <div class="card-body" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
+              <div>
+                <div style="font-weight:600; margin-bottom:.3rem;">Deposit addresses (JSON)</div>
+                <textarea id="setAddresses" rows="8" style="width:100%; padding:.7rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:#e5e8ff; font-family: ui-monospace, Consolas, monospace;"></textarea>
+                <div style="margin-top:.5rem; display:flex; gap:.5rem; justify-content:flex-end;"><button class="page-btn" id="saveAddresses">Save</button></div>
+              </div>
+              <div>
+                <div style="font-weight:600; margin-bottom:.3rem;">Minimum deposit per asset (JSON)</div>
+                <textarea id="setMinDeposit" rows="6" style="width:100%; padding:.7rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:#e5e8ff; font-family: ui-monospace, Consolas, monospace;"></textarea>
+                <div style="margin-top:.5rem; display:flex; gap:.5rem; justify-content:flex-end;"><button class="page-btn" id="saveMin">Save</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="userDetailDrawer" class="drawer">
+      <div class="drawer-overlay" id="userDetailOverlay"></div>
+      <aside class="drawer-panel">
+        <div class="drawer-header">
+          <div>
+            <div class="drawer-title" id="detailName">User detail</div>
+            <div class="drawer-subtitle" id="detailEmail">-</div>
+          </div>
+          <div class="drawer-actions">
+            <button class="page-btn" id="detailCredit">Credit</button>
+            <button class="page-btn" id="detailDebit">Debit</button>
+            <button class="drawer-close" id="userDetailClose" aria-label="Close">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="drawer-content">
+          <section class="detail-section">
+            <h3>Overview</h3>
+            <dl class="detail-meta" id="detailMeta"></dl>
+          </section>
+          <section class="detail-section">
+            <h3>Wallets</h3>
+            <div class="table-container tight">
+              <table>
+                <thead><tr><th>Currency</th><th>Available</th><th>Locked</th><th>Total</th><th>Updated</th></tr></thead>
+                <tbody id="detailWallets"><tr><td colspan="5">No wallets</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="detail-section">
+            <div class="detail-section-header">
+              <h3>Stakes</h3>
+              <span class="detail-badge" id="detailStakeCount">0 active</span>
+            </div>
+            <div class="table-container tight">
+              <table>
+                <thead><tr><th>ID</th><th>Plan</th><th>Amount</th><th>Status</th><th>Ends</th><th>Timer</th></tr></thead>
+                <tbody id="detailStakes"><tr><td colspan="6">No stakes</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="detail-section">
+            <h3>Pending requests</h3>
+            <div class="table-container tight">
+              <table>
+                <thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Created</th></tr></thead>
+                <tbody id="detailPending"><tr><td colspan="4">No pending requests</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="detail-section">
+            <h3>Recent transactions</h3>
+            <div class="table-container tight">
+              <table>
+                <thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Created</th></tr></thead>
+                <tbody id="detailTransactions"><tr><td colspan="4">No activity</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script src="../desteny/env.js"></script>
+    <script src="../desteny/supabaseClient.js"></script>
+    <script src="cabinet-auth.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>

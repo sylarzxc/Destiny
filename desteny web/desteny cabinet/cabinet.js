@@ -33,6 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Ensure a visible arrow indicator at the end of each sidebar item
+  // Some environments may fail to render inline SVGs; provide a text fallback.
+  document.querySelectorAll('.sidebar .nav-item').forEach((item) => {
+    const hasSvgArrow = !!item.querySelector('.nav-arrow');
+    const hasFallback = !!item.querySelector('.nav-fallback-arrow');
+    if (!hasSvgArrow && !hasFallback) {
+      const span = document.createElement('span');
+      span.className = 'nav-fallback-arrow';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = '›';
+      item.appendChild(span);
+    }
+  });
+
   // ===== mobile sidebar toggle (insert / replace existing mobile-topbar code) =====
   document.addEventListener('DOMContentLoaded', () => {
     // create mobile topbar (burger only) if not present
@@ -88,8 +102,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth <= 900) {
           setTimeout(() => closeSidebar(), 120);
         }
-      });
-    });
+  });
+
+  // Fallback: if user is admin (flag set by cabinet-auth.js), ensure Admin link exists
+  function ensureAdminLink() {
+    if (!window.__isAdmin) return;
+    const nav = document.querySelector('.sidebar .sidebar-nav');
+    if (!nav) return;
+    if (!nav.querySelector('a[href="admin.html"]')) {
+      const a = document.createElement('a');
+      a.href = 'admin.html';
+      a.className = 'nav-item';
+      a.innerHTML = `
+        <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M3 12h18M3 6h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+        <span>Admin</span>
+        <svg class="nav-arrow" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      nav.appendChild(a);
+    }
+  }
+  // Try now and once again shortly after to avoid timing issues
+  ensureAdminLink();
+  setTimeout(ensureAdminLink, 400);
+
+  // Watch for auth script finishing and insert Admin link when flag appears
+  (function watchAdminLink(){
+    let tries = 0;
+    const timer = setInterval(() => {
+      const have = document.querySelector('.sidebar .sidebar-nav a[href="admin.html"]');
+      if (window.__isAdmin && !have) ensureAdminLink();
+      tries++;
+      if (have || tries > 20) clearInterval(timer); // ~5s max
+    }, 250);
+  })();
+});
   });
   // ===== end mobile sidebar toggle =====
 });

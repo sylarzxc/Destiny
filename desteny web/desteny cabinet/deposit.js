@@ -4,7 +4,7 @@
     if (!window.sb || !window.authHelpers) return; // Supabase not configured yet
 
     // Demo switch: when true, delete/reset act only on UI (no Supabase writes)
-    const DEMO_LOCAL_DELETE = true;
+    const DEMO_LOCAL_DELETE = false;
 
     const amountEl = document.getElementById('depositAmount');
     const termEl = document.getElementById('depositTerm');
@@ -14,6 +14,7 @@
     const dailyEl = document.getElementById('depositDailyIncome');
     const currencyEl = document.getElementById('depositCurrency');
     const toggleBtns = document.querySelectorAll('.staking-toggle .toggle-btn');
+    const amountNote = document.getElementById('depositAmountNote');
     const activeListContainer = document.querySelector('.deposit-active .card-body');
 
     const session = await window.authHelpers.session();
@@ -162,7 +163,6 @@
         if (!plan) return;
         planId = plan.id;
       } else {
-        // choose first flexible plan if exists
         if (!state.flexiblePlans.length) {
           alert('No flexible plan configured in the database.');
           return;
@@ -170,67 +170,28 @@
         planId = state.flexiblePlans[0].id;
       }
 
-      const payload = {
-        user_id: session.user.id,
-        plan_id: planId,
-        amount,
-        status: 'active',
-      };
-      if (state.mode === 'flexible') {
-        const flexDays = Math.max(1, Number(daysEl?.value || 1));
-        payload.flex_days = flexDays; // may be ignored if column absent
-      }
-      let { data: inserted, error } = await window.sb
-        .from('stakes')
-        .insert(payload)
-        .select('id')
-        .single();
-      // If flex_days column doesn't exist yet, retry without it (so UI works before migration)
-      if (error && String(error.message || '').toLowerCase().includes('flex_days')) {
-        delete payload.flex_days;
-        ({ data: inserted, error } = await window.sb
-          .from('stakes')
-          .insert(payload)
-          .select('id')
-          .single());
-      }
-      if (error) {
-        console.warn('Open deposit error', error);
-        alert(error.message || 'Failed to open deposit');
+      const currency = (currencyEl?.value || 'usdt').toUpperCase();
+      if (amount > walletAvailable) {
+        validateAmount();
         return;
       }
-      // Log a transaction for transparency (may require RLS insert policy on transactions)
-      try {
-        await window.sb.from('transactions').insert({
-          user_id: session.user.id,
-          type: 'stake_create',
-          amount,
-          meta: { plan_id: planId, stake_id: inserted?.id || null },
-        });
-      } catch (txErr) {
-        console.warn('Transaction log failed (optional):', txErr);
+      const args = {
+        p_plan_id: planId,
+        p_amount: amount,
+        p_currency: currency,
+        p_flex_days: state.mode === 'flexible' ? Math.max(1, Number(daysEl?.value || 1)) : null,
+      };
+      const { data, error } = await window.sb.rpc('open_stake', args);
+      if (error) {
+        const m = String(error.message || '').toLowerCase();
+        if (m.includes('insufficient')) alert('Insufficient funds. Top up your balance.');
+        else alert(error.message || 'Failed to open deposit');
+        return;
       }
-      // If demo reset was used (ALL hidden), clear the flag so new deposits appear
-      try {
-        if (DEMO_LOCAL_DELETE) {
-          const raw = sessionStorage.getItem('demoHiddenStakes');
-          if (raw === 'ALL') {
-            sessionStorage.removeItem('demoHiddenStakes');
-          } else if (raw) {
-            try {
-              const ids = JSON.parse(raw) || [];
-              const newId = inserted?.id;
-              if (newId != null) {
-                const idx = ids.indexOf(newId);
-                if (idx >= 0) { ids.splice(idx, 1); sessionStorage.setItem('demoHiddenStakes', JSON.stringify(ids)); }
-              }
-            } catch {}
-          }
-        }
-      } catch {}
       amountEl.value = '';
       estimate();
       await renderActiveStakesNew();
+      try { await refreshWallet(currency); } catch (_) {}
     }
 
     async function renderActiveStakes() {
@@ -355,52 +316,25 @@
         estimate();
       });
     });
-    openBtn?.addEventListener('click', openDeposit);
-    // Withdraw flexible stake now (close)
+    // Confirm flow before opening a deposit
+    openBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showConfirm();
+    });
+    // Withdraw flexible stake now (close) via RPC
     activeListContainer?.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-action="withdraw-stake"]');
       if (!btn) return;
-      const id = btn.getAttribute('data-id');
+      const id = Number(btn.getAttribute('data-id'));
       if (!id) return;
       if (!confirm('Withdraw this flexible deposit now?')) return;
-      const { data: stake, error: loadErr } = await window.sb
-        .from('stakes')
-        .select('id, amount, start_at, plans:plan_id (days, apr, type)')
-        .eq('id', id)
-        .eq('user_id', session.user.id)
-        .single();
-      if (loadErr || !stake) {
-        alert(loadErr?.message || 'Failed to load deposit');
+      const { data, error } = await window.sb.rpc('withdraw_stake', { p_stake_id: id });
+      if (error) {
+        alert(error.message || 'Failed to withdraw');
         return;
       }
-      const plan = stake.plans || {};
-      if (plan.type !== 'flexible') {
-        alert('Only flexible deposits can be withdrawn early.');
-        return;
-      }
-      const started = new Date(stake.start_at);
-      const now = new Date();
-      const elapsedDays = Math.max(1, Math.floor((now - started) / (1000*60*60*24)));
-      const perDay = Number(plan.apr || 0) / Math.max(1, Number(plan.days || 1));
-      const reward = Number(stake.amount) * perDay * elapsedDays;
-      const { error: updErr } = await window.sb
-        .from('stakes')
-        .update({ status: 'closed', end_at: now.toISOString(), yield_accumulated: reward })
-        .eq('id', id)
-        .eq('user_id', session.user.id);
-      if (updErr) {
-        alert(updErr.message || 'Failed to withdraw');
-        return;
-      }
-      try {
-        await window.sb.from('transactions').insert({
-          user_id: session.user.id,
-          type: 'stake_withdraw',
-          amount: Number(stake.amount) + reward,
-          meta: { stake_id: id, reward, elapsed_days: elapsedDays }
-        });
-      } catch {}
       await renderActiveStakesNew();
+      try { const cur = (currencyEl?.value || 'usdt').toUpperCase(); await refreshWallet(cur); } catch (_) {}
     });
 
     // Reset all deposits (test only)
@@ -448,8 +382,115 @@
     }
     // (removed old Delete handler),n
 
+    let walletAvailable = 0;
+    async function refreshWallet(cur) {
+      try {
+        const { data } = await window.sb
+          .from('wallets')
+          .select('available, locked')
+          .eq('currency', (cur || 'USDT'))
+          .single();
+        walletAvailable = Number(data?.available || 0);
+        // set max and revalidate
+        if (amountEl) amountEl.max = walletAvailable || '';
+        validateAmount();
+      } catch (_) {}
+    }
+
+    currencyEl?.addEventListener('change', (e) => {
+      const cur = (e.target.value || 'usdt').toUpperCase();
+      refreshWallet(cur);
+      estimate();
+    });
+
+    function validateAmount() {
+      const amount = Number(amountEl?.value || 0);
+      const disabled = !amount || amount <= 0 || amount > walletAvailable;
+      if (openBtn) openBtn.disabled = disabled;
+      if (!amountEl) return;
+      if (amount > walletAvailable) {
+        // clamp value to max so user can't type more than available
+        if (walletAvailable > 0) {
+          amountEl.value = String(walletAvailable);
+        } else {
+          amountEl.value = '';
+        }
+        const amt = Number(amountEl.value || 0);
+        estimate();
+        amountEl.classList.add('error');
+        if (amountNote) {
+          amountNote.style.display = 'block';
+          amountNote.classList.add('error');
+          amountNote.textContent = `Insufficient balance. Available: ${walletAvailable.toFixed(2)} ${(currencyEl?.value||'USDT').toUpperCase()}`;
+        }
+      } else {
+        amountEl.classList.remove('error');
+        if (amountNote) {
+          amountNote.style.display = amount ? 'block' : 'none';
+          amountNote.classList.remove('error');
+          if (amount) amountNote.textContent = `You will lock ${amount.toFixed(2)} ${(currencyEl?.value||'USDT').toUpperCase()} for this deposit.`; else amountNote.textContent = '';
+        }
+      }
+    }
+
+    amountEl?.addEventListener('input', () => { estimate(); validateAmount(); });
+
     await loadPlans();
     await renderActiveStakesNew();
+    const startCur = (currencyEl?.value || 'usdt').toUpperCase();
+    await refreshWallet(startCur);
+
+    // --- Confirm modal logic ---
+    const modal = document.getElementById('depositConfirm');
+    const btnClose = document.getElementById('confirmClose');
+    const btnCancel = document.getElementById('confirmCancel');
+    const btnSubmit = document.getElementById('confirmSubmit');
+    const cfType = document.getElementById('cfType');
+    const cfAmount = document.getElementById('cfAmount');
+    const cfTerm = document.getElementById('cfTerm');
+    const cfDaily = document.getElementById('cfDaily');
+    const cfTotal = document.getElementById('cfTotal');
+
+    function computePreview() {
+      const amount = Number(amountEl?.value || 0);
+      const cur = (currencyEl?.value || 'usdt').toUpperCase();
+      let daily = 0, total = amount;
+      if (state.mode === 'locked') {
+        const plan = getSelectedLockedPlan();
+        const days = Number(plan?.days || 0);
+        const monthly = {30:0.075, 90:0.105, 180:0.125}[days];
+        const profit = (monthly != null) ? amount * monthly * (days/30) : amount * Number(plan?.apr || 0);
+        daily = days>0 ? profit/days : 0; total = amount + profit;
+        cfType.textContent = `Locked`;
+        cfTerm.textContent = `${days} days`;
+      } else {
+        const days = Math.max(1, Number(daysEl?.value || 1));
+        const dailyRate = 0.045/30; // flexible monthly 4.5%
+        daily = amount * dailyRate; total = amount + daily * days;
+        cfType.textContent = `Flexible`;
+        cfTerm.textContent = `${days} day${days===1?'':'s'}`;
+      }
+      cfAmount.textContent = `${amount.toFixed(2)} ${cur}`;
+      cfDaily.textContent = `${daily.toFixed(2)} ${cur}`;
+      cfTotal.textContent = `${total.toFixed(2)} ${cur}`;
+    }
+
+    function showConfirm() {
+      if (!amountEl || Number(amountEl.value||0) <= 0) return;
+      if (Number(amountEl.value) > walletAvailable) { validateAmount(); return; }
+      computePreview();
+      modal?.classList.add('show');
+      modal?.setAttribute('aria-hidden','false');
+    }
+    function hideConfirm() {
+      modal?.classList.remove('show');
+      modal?.setAttribute('aria-hidden','true');
+    }
+    btnClose?.addEventListener('click', hideConfirm);
+    btnCancel?.addEventListener('click', hideConfirm);
+    modal?.addEventListener('click', (e)=>{ if (e.target === modal) hideConfirm(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') hideConfirm(); });
+    btnSubmit?.addEventListener('click', async ()=>{ try{ await openDeposit(); hideConfirm(); } catch(_){}});
   });
 })();
 

@@ -76,7 +76,30 @@
     els.amount?.addEventListener('input', updateEstimate);
     els.submit?.addEventListener('click', submitSend);
 
-    populateNetworks(); updateEstimate();
+    async function updateTokenCards(){
+      try{
+        const { data } = await window.sb.from('wallets').select('currency, available, locked');
+        const map = new Map();
+        (data||[]).forEach(r=> map.set(String(r.currency||'').toUpperCase(), Number(r.available||0)));
+        document.querySelectorAll('.token-card').forEach(async (card)=>{
+          const name = card.querySelector('.token-name')?.textContent?.trim().toUpperCase();
+          if(!name) return;
+          const amount = map.get(name) || 0;
+          const valEl = card.querySelector('.token-value');
+          const amtEl = card.querySelector('.token-amount');
+          if (amtEl) amtEl.textContent = `${amount.toFixed(2)} ${name}`;
+          if (valEl) {
+            try {
+              const usd = await (window.ratesUtil?.estimateUSDT(name, amount) || Promise.resolve(0));
+              valEl.textContent = `$${Number(usd).toFixed(2)}`;
+            } catch {
+              valEl.textContent = name === 'USDT' ? `$${amount.toFixed(2)}` : '$0';
+            }
+          }
+        });
+      }catch(_){ }
+    }
+
+    populateNetworks(); updateEstimate(); updateTokenCards();
   });
 })();
-

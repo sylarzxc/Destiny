@@ -1,7 +1,12 @@
-// Supabase-driven login
+﻿// Supabase-driven login
 console.log('Destiny login page loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+    if (refCode) { localStorage.setItem('destiny_pending_referral', refCode); }
+  } catch (err) { console.warn('Referral param capture failed', err); }
   const form = document.querySelector('.auth-form');
   if (!form) return;
 
