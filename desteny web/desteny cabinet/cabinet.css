@@ -1,10 +1,10 @@
-/*
+﻿/*
   Destiny Personal Cabinet Styles
   --------------------------------
   This stylesheet defines the layout and visual treatment for the
   authenticated user area (personal cabinet). It reuses the dark
   palette and vibrant gradients from the landing page while
-  introducing a sidebar navigation and dashboard‑style panels.
+  introducing a sidebar navigation and dashboardвЂ‘style panels.
 */
 
 /* Colour palette and metrics */
@@ -315,10 +315,7 @@ body.is-admin .nav-item.nav-admin { display: flex; }
 .main-content.main-wide { width: 100%; max-width: none; }
 
 /* Width limiter inside main to create right-side breathing space (per design) */
-.main-inner {
-  width: min(1160px, 100%);
-  margin-left: 60px;
-}
+.main-inner {`n  width: min(1160px, 100%);`n  margin: 0 auto;`n  padding-inline: clamp(1rem, 3vw, 2rem);`n}
 
 .page-header h1 {
   font-size: 1.8rem;
@@ -484,9 +481,7 @@ body.is-admin .nav-item.nav-admin { display: flex; }
 }
 
 /* Three fixed columns on wide screens for dashboard top row */
-.dashboard-top {
-  grid-template-columns: repeat(3, minmax(280px, 1fr));
-}
+.dashboard-top {`n  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));`n  grid-auto-rows: 1fr;`n}
 
 /* Utility: make card span all columns */
 .span-all {
@@ -846,7 +841,7 @@ body.is-admin .nav-item.nav-admin { display: flex; }
   border-radius: 8px;
 }
 
-/* Receive — improved layout */
+/* Receive вЂ” improved layout */
 .receive-form .address-field,
 .send-form .address-field {
   display: grid;
@@ -1352,7 +1347,7 @@ body.drawer-open {
    ============================ */
 
 @media (max-width: 900px) {
-   /* top mobile bar: центрований заголовок, бургер праворуч */
+   /* top mobile bar: С†РµРЅС‚СЂРѕРІР°РЅРёР№ Р·Р°РіРѕР»РѕРІРѕРє, Р±СѓСЂРіРµСЂ РїСЂР°РІРѕСЂСѓС‡ */
    .mobile-topbar {
      position: fixed;
      top: 0;
@@ -1361,7 +1356,7 @@ body.drawer-open {
      height: 56px;
      display: flex;
      align-items: center;
-     justify-content: center; /* центр контенту */
+     justify-content: center; /* С†РµРЅС‚СЂ РєРѕРЅС‚РµРЅС‚Сѓ */
      gap: 12px;
      padding: 0 12px;
      background: linear-gradient(90deg, rgba(3,8,18,0.6), rgba(6,11,20,0.6));
@@ -1369,7 +1364,7 @@ body.drawer-open {
       backdrop-filter: blur(6px);
       justify-content: flex-start !important;
     }
-   /* кнопка бургеру прижата праворуч */
+   /* РєРЅРѕРїРєР° Р±СѓСЂРіРµСЂСѓ РїСЂРёР¶Р°С‚Р° РїСЂР°РІРѕСЂСѓС‡ */
    .mobile-topbar .menu-toggle {
      position: absolute;
      right: 12px;
@@ -1384,7 +1379,7 @@ body.drawer-open {
    }
    .mobile-topbar .menu-toggle svg { width:22px; height:22px; color: #fff; }
 
-   /* сховаємо текст у mobile-title — заголовок показуємо в .page-header */
+   /* СЃС…РѕРІР°С”РјРѕ С‚РµРєСЃС‚ Сѓ mobile-title вЂ” Р·Р°РіРѕР»РѕРІРѕРє РїРѕРєР°Р·СѓС”РјРѕ РІ .page-header */
    .mobile-topbar .mobile-title {
      display: inline-block;
       font-size: 1.9rem;
@@ -1461,9 +1456,9 @@ body.drawer-open {
 
    .token-balance-grid { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); }
 
-   .main-inner { margin-left: 0; max-width: 100%; }
+   .main-inner { margin: 0; max-width: 100%; padding-inline: 0; }
 
-   /* Центруємо заголовок сторінки на мобайлі/планшеті */
+   /* Р¦РµРЅС‚СЂСѓС”РјРѕ Р·Р°РіРѕР»РѕРІРѕРє СЃС‚РѕСЂС–РЅРєРё РЅР° РјРѕР±Р°Р№Р»С–/РїР»Р°РЅС€РµС‚С– */
    .page-header { display:flex; justify-content:center; align-items:center; }
    .page-header h1 { margin-top: 0.25rem; font-size: 1.35rem; padding-left: 0; text-align: center; }
 
@@ -1476,7 +1471,7 @@ body.drawer-open {
    .card { padding: 1rem; border-radius: 12px; }
    .btn-primary { width: 100%; display: block; }
 
-   /* додатково зменшуємо відступ хедера щоб картка визначалася центром */
+   /* РґРѕРґР°С‚РєРѕРІРѕ Р·РјРµРЅС€СѓС”РјРѕ РІС–РґСЃС‚СѓРї С…РµРґРµСЂР° С‰РѕР± РєР°СЂС‚РєР° РІРёР·РЅР°С‡Р°Р»Р°СЃСЏ С†РµРЅС‚СЂРѕРј */
    .main-content { padding-top: 68px; }
    .page-header h1 { font-size: 1.25rem; }
  }
@@ -1497,3 +1492,16 @@ body.drawer-open {
 .btn-copy.copied {
   color: var(--primary-color);
 }
+
+
+.dashboard-top .card {
+  height: 100%;
+}
+
+@media (min-width: 1240px) {
+  .dashboard-top {
+    grid-template-columns: repeat(3, minmax(320px, 1fr));
+  }
+}
+
+

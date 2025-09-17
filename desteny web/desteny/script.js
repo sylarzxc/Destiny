@@ -8,7 +8,22 @@
   reflect actual financial products or advice.
 */
 
-document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params = new URLSearchParams(window.location.search);\n    const refCode = params.get('ref');\n    if (refCode) {\n      localStorage.setItem('destiny_pending_referral', refCode);\n      if (typeof window.history?.replaceState === 'function') {\n        const url = new URL(window.location.href);\n        url.searchParams.delete('ref');\n        window.history.replaceState({}, document.title, url.toString());\n      }\n    }\n  } catch (err) {\n    console.warn('Failed to process referral param', err);\n  }\n\n
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      localStorage.setItem('destiny_pending_referral', refCode);
+      if (typeof window.history?.replaceState === 'function') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('ref');
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to process referral param', err);
+  }
+
   // ------------------------------
   // Token selection & symbol tags
   // ------------------------------
@@ -39,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params
     li?.classList.add('active');
     updateAmountLabel();
     // Recalculate on token change
-    document.getElementById('calculateBtn')?.click();
+    performCalc();
   }
   // Bind clicks to token icons
   const tokenImgs = document.querySelectorAll('.token-list li img');
@@ -77,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params
       periodButtons.forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       // Recalculate on change
-      document.getElementById('calculateBtn')?.click();
+      performCalc();
     });
   });
 
@@ -103,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params
       const target = btn.getAttribute('data-target');
       setMode(target === 'flexible' ? 'flexible' : 'locked');
       // Recalculate on mode change
-      document.getElementById('calculateBtn')?.click();
+      performCalc();
     });
   });
 
@@ -113,19 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params
   // Recalculate as amount changes
   const stakeAmountInput = document.getElementById('stakeAmount');
   stakeAmountInput?.addEventListener('input', () => {
-    document.getElementById('calculateBtn')?.click();
+    performCalc();
   });
 
   // Calculator logic
-  const calculateBtn = document.getElementById('calculateBtn');
-  calculateBtn.addEventListener('click', () => {
+  function performCalc() {
     const amountInput = document.getElementById('stakeAmount');
     const dailyReturnEl = document.getElementById('dailyReturn');
     const totalReturnEl = document.getElementById('totalReturn');
     const activePeriod = document.querySelector('.period-btn.active');
     const flexibleActive = document.querySelector('.staking-toggle .toggle-btn.active[data-target="flexible"]');
 
-    const amount = parseFloat(amountInput.value);
+    const amount = parseFloat(amountInput?.value || '0');
     let days = 0;
     if (flexibleActive) {
       days = 1; // per-day calculation in flexible mode
@@ -135,33 +149,29 @@ document.addEventListener('DOMContentLoaded', () => {\n  try {\n    const params
 
     // Clear previous values if invalid
     if (!amount || amount <= 0 || !days) {
-      dailyReturnEl.innerHTML = `0 <span class="unit">(${selectedToken})</span>`;
-      totalReturnEl.innerHTML = `0 <span class="unit">(${selectedToken})</span>`;
+      if (dailyReturnEl) dailyReturnEl.innerHTML = `0 <span class="unit">(${selectedToken})</span>`;
+      if (totalReturnEl) totalReturnEl.innerHTML = `0 <span class="unit">(${selectedToken})</span>`;
       return;
     }
 
-    // Client-specified monthly rates (simple interest, no compounding):
-    // 30d -> 7.5%/month, 90d -> 10.5%/month, 180d -> 12.5%/month.
-    // Profit accrues linearly once per day.
     const monthlyRates = { 30: 0.075, 90: 0.105, 180: 0.125 };
-    // Flexible staking: 4.5% per month, accrues daily.
     const dailyRateFlexible = 0.045 / 30;
-    // For locked plans, total rate over the whole period is monthly * (days/30)
     const totalRate = (flexibleActive)
       ? dailyRateFlexible * days
       : ((monthlyRates[days] || 0) * (days / 30));
 
-    // Compute returns
     const dailyReturn = flexibleActive
       ? (amount * dailyRateFlexible)
-      : (amount * totalRate) / days; // equals amount * (monthlyRate/30)
+      : (amount * totalRate) / days;
     const totalReturn = amount * (flexibleActive ? dailyRateFlexible * days : totalRate);
 
-    // Format: show more precision for small values
     const fmt = (v) => (Math.abs(v) < 0.01 ? v.toFixed(4) : v.toFixed(2));
-    dailyReturnEl.innerHTML = `${fmt(dailyReturn)} <span class="unit">(${selectedToken})</span>`;
-    totalReturnEl.innerHTML = `${fmt(totalReturn)} <span class="unit">(${selectedToken})</span>`;
-  });
+    if (dailyReturnEl) dailyReturnEl.innerHTML = `${fmt(dailyReturn)} <span class="unit">(${selectedToken})</span>`;
+    if (totalReturnEl) totalReturnEl.innerHTML = `${fmt(totalReturn)} <span class="unit">(${selectedToken})</span>`;
+  }
+
+  const calculateBtn = document.getElementById('calculateBtn');
+  calculateBtn?.addEventListener('click', performCalc);
 
   // Enable drag-to-scroll for token selector (works for vertical or horizontal)
   const tokenColumn = document.querySelector('.token-column');
