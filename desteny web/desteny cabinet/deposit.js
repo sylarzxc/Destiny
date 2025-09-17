@@ -281,9 +281,24 @@
         const titleRight = plan.type === 'flexible' ? `(${flexDays} day${flexDays===1?'':'s'})` : `(${plan.days} days)`;
         const apr = Number(plan.apr || 0);
         const perDay = apr / Math.max(1, Number(plan.days || 1));
-        const est = plan.type === 'flexible' ? (Number(row.amount) * perDay * flexDays).toFixed(2)
-                                             : (Number(row.amount) * apr).toFixed(2);
-        const totalPayout = (Number(row.amount) + Number(est)).toFixed(2);
+        
+        // Use compound calculation for locked deposits with known durations
+        let est = 0;
+        if (plan.type === 'flexible') {
+          est = Number(row.amount) * perDay * flexDays;
+        } else {
+          const days = Number(plan.days || 0);
+          const monthlyRate = LOCAL_MONTHLY_RATES[days];
+          if (monthlyRate != null) {
+            // Use compound calculation for 30/90/180 day deposits
+            est = calculateCompoundReturn(Number(row.amount), days, monthlyRate);
+          } else {
+            // Fallback to simple calculation for other durations
+            est = Number(row.amount) * apr;
+          }
+        }
+        
+        const totalPayout = (Number(row.amount) + est).toFixed(2);
         return `
           <div class="deposit-item">
             <div class="deposit-item-main">
@@ -300,7 +315,7 @@
             <div class="deposit-footer">
               <span class="status">${row.status}</span>
               <span class="apr">APR ${(apr * 100).toFixed(2)}%</span>
-              <span class="est">Est. reward ${est} USDT</span>
+              <span class="est">Est. reward ${est.toFixed(2)} USDT</span>
             </div>
           </div>`;
       }).join('');
