@@ -157,15 +157,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyRates = { 30: 0.075, 90: 0.105, 180: 0.125 };
     const dailyRateFlexible = 0.045 / 30;
     
-    // Calculate compound monthly returns for locked staking
+    // Calculate simple monthly returns for locked staking
     let totalRate = 0;
     if (flexibleActive) {
       totalRate = dailyRateFlexible * days;
     } else {
       const monthlyRate = monthlyRates[days] || 0;
       const months = days / 30;
-      // Compound calculation: each month earns the monthly rate on the accumulated amount
-      totalRate = Math.pow(1 + monthlyRate, months) - 1;
+      // Simple calculation: monthly rate × number of months
+      totalRate = monthlyRate * months;
     }
 
     const dailyReturn = flexibleActive

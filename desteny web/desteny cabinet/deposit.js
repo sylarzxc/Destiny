@@ -117,10 +117,10 @@
       return FLEX_MONTHLY_RATE / 30;
     }
 
-    // Calculate compound monthly returns for locked staking
-    function calculateCompoundReturn(amount, days, monthlyRate) {
+    // Calculate simple monthly returns for locked staking
+    function calculateSimpleReturn(amount, days, monthlyRate) {
       const months = days / 30;
-      const totalRate = Math.pow(1 + monthlyRate, months) - 1;
+      const totalRate = monthlyRate * months;
       return amount * totalRate;
     }
 
@@ -142,9 +142,9 @@
         if (!plan) { estEl.textContent = `0 ${cur}`; if (dailyEl) dailyEl.textContent = `0 ${cur}`; return; }
         const days = Number(plan.days || 0);
         const monthly = LOCAL_MONTHLY_RATES[days];
-        // If we recognise the duration (30/90/180), use compound calculation; otherwise fallback to plan.apr
+        // If we recognise the duration (30/90/180), use simple calculation; otherwise fallback to plan.apr
         const profit = (monthly != null)
-          ? calculateCompoundReturn(amount, days, monthly)
+          ? calculateSimpleReturn(amount, days, monthly)
           : amount * Number(plan.apr || 0);
         const totalPayout = amount + profit;
         const dailyProfit = days > 0 ? (profit / days) : 0;
@@ -290,8 +290,8 @@
           const days = Number(plan.days || 0);
           const monthlyRate = LOCAL_MONTHLY_RATES[days];
           if (monthlyRate != null) {
-            // Use compound calculation for 30/90/180 day deposits
-            est = calculateCompoundReturn(Number(row.amount), days, monthlyRate);
+            // Use simple calculation for 30/90/180 day deposits
+            est = calculateSimpleReturn(Number(row.amount), days, monthlyRate);
           } else {
             // Fallback to simple calculation for other durations
             est = Number(row.amount) * apr;
@@ -496,7 +496,7 @@
         const plan = getSelectedLockedPlan();
         const days = Number(plan?.days || 0);
         const monthly = {30:0.075, 90:0.105, 180:0.125}[days];
-        const profit = (monthly != null) ? calculateCompoundReturn(amount, days, monthly) : amount * Number(plan?.apr || 0);
+        const profit = (monthly != null) ? calculateSimpleReturn(amount, days, monthly) : amount * Number(plan?.apr || 0);
         daily = days>0 ? profit/days : 0; total = amount + profit;
         cfType.textContent = `Locked`;
         cfTerm.textContent = `${days} days`;
