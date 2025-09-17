@@ -1,2 +1,2 @@
 # Destiny
-Destiny 0.2 beta
+Destiny 0.3 beta
