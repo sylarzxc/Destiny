@@ -298,8 +298,19 @@ body.auth-body {
     color: rgba(255,255,255,0.6);
   }
 
-  /* Приховати важкі елементи, але зберегти атмосферу */
-  .auth-bg { display: none; } /* якщо хочеш — можна показувати задній план через background-image в body */
+  /* Додаємо фон як у реєстрації */
+  .auth-bg {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url('assets/cosmic-bg.png');
+    background-size: cover;
+    background-position: center top;
+    opacity: 0.6;
+    filter: brightness(0.45) blur(0.8px);
+    pointer-events: none;
+  }
 
   /* Footer links нижче картки */
   .auth-footer-links a {

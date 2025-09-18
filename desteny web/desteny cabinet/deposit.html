@@ -107,9 +107,22 @@
       </aside>
       <main class="main-content">
         <header class="page-header">
-          <h1>Deposit</h1>
+          <div class="page-header-left">
+            <h1>Deposit</h1>
+            <div class="header-balance-info">
+              <div class="balance-item">
+                <span class="balance-label">Balance</span>
+                <span class="balance-value" id="currentBalance">$0.00</span>
+              </div>
+              <div class="balance-item">
+                <span class="balance-label">Daily Profit</span>
+                <span class="balance-value profit" id="expectedDailyProfit">$0.00</span>
+              </div>
+            </div>
+          </div>
         </header>
         <div class="deposit-grid">
+          
           <!-- Open deposit panel -->
           <div class="card deposit-open">
             <div class="card-header">
@@ -129,7 +142,7 @@
                 <div class="form-field">
                   <label>Amount</label>
                   <input id="depositAmount" type="number" placeholder="e.g. 2000" min="0" />
-                  <div id="depositAmountNote" class="form-hint" style="display:none;margin-top:.5rem;"></div>
+                  <div id="depositAmountNote" class="form-hint" style="display:none"></div>
                 </div>
                 <div class="form-field">
                   <label>Currency</label>
@@ -214,6 +227,9 @@
     <script src="../desteny/supabaseClient.js"></script>
     <script src="cabinet-auth.js"></script>
     <script src="cabinet.js"></script>
+    <script src="notifications.js"></script>
+    <script src="security.js"></script>
+    <script src="optimization.js"></script>
     <script src="deposit.js"></script>
   </body>
 </html>

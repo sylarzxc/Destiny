@@ -222,7 +222,7 @@
         case 'stake_create':
           return 'Deposit opened';
         case 'stake_yield':
-          return 'Yield';
+          return 'Daily yield';
         case 'withdraw':
           return 'Withdrawn';
         case 'deposit':
@@ -231,6 +231,40 @@
           return 'Accrual';
         default:
           return type || '-';
+      }
+    };
+
+    const getTypeIcon = (type) => {
+      switch (String(type || '').toLowerCase()) {
+        case 'stake_create':
+          return '💰';
+        case 'stake_yield':
+          return '📈';
+        case 'withdraw':
+          return '💸';
+        case 'deposit':
+          return '💳';
+        case 'accrual':
+          return '⚡';
+        default:
+          return '📄';
+      }
+    };
+
+    const getTypeColor = (type) => {
+      switch (String(type || '').toLowerCase()) {
+        case 'stake_create':
+          return '#51cf66';
+        case 'stake_yield':
+          return '#74c0fc';
+        case 'withdraw':
+          return '#ff6b6b';
+        case 'deposit':
+          return '#ffd43b';
+        case 'accrual':
+          return '#9c48ec';
+        default:
+          return '#8a8fa7';
       }
     };
 
@@ -245,6 +279,9 @@
 
     const loadPage = async () => {
       try {
+        // Show loading state
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #8a8fa7;"><span class="loading-spinner"></span> Loading transactions...</td></tr>';
+        
         const from = (page - 1) * pageSize;
         const to = page * pageSize - 1;
 
@@ -263,18 +300,26 @@
           const amountNumber = Number(row.amount || 0);
           const amountSign = amountNumber > 0 ? '+' : '';
           const amountDisplay = `${amountSign}${amountNumber.toFixed(2)} ${currency}`;
+          const typeColor = getTypeColor(row.type);
+          const typeIcon = getTypeIcon(row.type);
 
           const details = joinClean([
             meta.stake_id ? `Stake #${meta.stake_id}` : '',
-            meta.note ? String(meta.note) : ''
+            meta.note ? String(meta.note) : '',
+            meta.yield_type ? `(${meta.yield_type})` : ''
           ], ' | ');
 
           return `<tr>
-            <td>${formatDate(row.created_at)}</td>
-            <td>${typeLabel(row.type)}</td>
-            <td>${amountDisplay}</td>
-            <td>${currency}</td>
-            <td>${details || '-'}</td>
+            <td style="color: #8a8fa7; font-size: 0.85rem;">${formatDate(row.created_at)}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.1rem;">${typeIcon}</span>
+                <span style="color: ${typeColor}; font-weight: 500;">${typeLabel(row.type)}</span>
+              </div>
+            </td>
+            <td style="font-weight: 600; color: ${amountNumber > 0 ? '#51cf66' : '#ff6b6b'};">${amountDisplay}</td>
+            <td style="color: #8a8fa7; font-size: 0.9rem;">${currency}</td>
+            <td style="color: #8a8fa7; font-size: 0.85rem;">${details || '-'}</td>
           </tr>`;
         }).join('');
 

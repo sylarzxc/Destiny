@@ -315,7 +315,17 @@ body.is-admin .nav-item.nav-admin { display: flex; }
 .main-content.main-wide { width: 100%; max-width: none; }
 
 /* Width limiter inside main to create right-side breathing space (per design) */
-.main-inner {`n  width: min(1160px, 100%);`n  margin: 0 auto;`n  padding-inline: clamp(1rem, 3vw, 2rem);`n}
+.main-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding-inline: clamp(0.25rem, 1vw, 0.5rem);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+}
 
 .page-header h1 {
   font-size: 1.8rem;
@@ -477,11 +487,15 @@ body.is-admin .nav-item.nav-admin { display: flex; }
   margin-top: 50px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.6rem;
+  gap: 1rem;
 }
 
 /* Three fixed columns on wide screens for dashboard top row */
-.dashboard-top {`n  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));`n  grid-auto-rows: 1fr;`n}
+.dashboard-top {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 2rem;
+}
 
 /* Utility: make card span all columns */
 .span-all {
@@ -658,8 +672,28 @@ body.is-admin .nav-item.nav-admin { display: flex; }
   grid-column: span 2;
 }
 
+/* Style cards inside deposit-grid to match card-balance */
+.deposit-grid .card {
+  background: rgb(255 255 255 / 0%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.deposit-grid .card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #5d76f7, #9c48ec, #51cf66);
+  border-radius: 12px 12px 0 0;
+}
+
 .deposit-open .deposit-form {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   margin-bottom: 0.4rem; /* create space before footer actions */
 }
 
@@ -1376,8 +1410,26 @@ body.drawer-open {
      background: rgba(255,255,255,0.03);
      border: 1px solid rgba(255,255,255,0.04);
      cursor: pointer;
+     transition: all 0.3s ease;
    }
-   .mobile-topbar .menu-toggle svg { width:22px; height:22px; color: #fff; }
+   
+   .mobile-topbar .menu-toggle:hover {
+     background: rgba(255,255,255,0.08);
+     border-color: rgba(255,255,255,0.1);
+     transform: scale(1.05);
+   }
+   
+   .mobile-topbar .menu-toggle svg { 
+     width:22px; 
+     height:22px; 
+     color: #fff; 
+     transition: all 0.3s ease;
+   }
+   
+   .mobile-topbar .menu-toggle.active svg {
+     transform: rotate(90deg);
+     opacity: 0.7;
+   }
 
    /* СЃС…РѕРІР°С”РјРѕ С‚РµРєСЃС‚ Сѓ mobile-title вЂ” Р·Р°РіРѕР»РѕРІРѕРє РїРѕРєР°Р·СѓС”РјРѕ РІ .page-header */
    .mobile-topbar .mobile-title {
@@ -1451,14 +1503,14 @@ body.drawer-open {
   .deposit-active .card-header { display:flex; flex-wrap: wrap; gap:.5rem; }
   .deposit-active .card-header span:first-child { flex: 1 1 auto; }
   .deposit-active .card-header .header-actions { margin-left:auto; display:flex; gap:.5rem; }
-    .dashboard-grid { margin-top: 15px; }
-    .dashboard-top { margin-top: 15px; }
+  .dashboard-grid { margin-top: 15px; }
+  .dashboard-top { margin-top: 15px; }
 
    .token-balance-grid { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); }
 
    .main-inner { margin: 0; max-width: 100%; padding-inline: 0; }
 
-   /* Р¦РµРЅС‚СЂСѓС”РјРѕ Р·Р°РіРѕР»РѕРІРѕРє СЃС‚РѕСЂС–РЅРєРё РЅР° РјРѕР±Р°Р№Р»С–/РїР»Р°РЅС€РµС‚С– */
+   /* Р¦РµРЅС‚СЂСѓС"РјРѕ Р·Р°РіРѕР»РѕРІРѕРє СЃС‚РѕСЂС–РЅРєРё РЅР° РјРѕР±Р°Р№Р»С–/РїР»Р°РЅС€РµС‚С– */
    .page-header { display:flex; justify-content:center; align-items:center; }
    .page-header h1 { margin-top: 0.25rem; font-size: 1.35rem; padding-left: 0; text-align: center; }
 
@@ -1501,6 +1553,711 @@ body.drawer-open {
 @media (min-width: 1240px) {
   .dashboard-top {
     grid-template-columns: repeat(3, minmax(320px, 1fr));
+  }
+}
+
+/* =============================================================
+   Deposit Page Header with Balance Info
+   ============================================================= */
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.page-header-left h1 {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.header-balance-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.header-balance-info .balance-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.header-balance-info .balance-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.header-balance-info .balance-label {
+  font-size: 0.65rem;
+  color: var(--muted-color);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.header-balance-info .balance-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.header-balance-info .balance-value.profit {
+  color: #51cf66;
+}
+
+/* Mobile adjustments for header balance */
+@media (max-width: 768px) {
+  .page-header {
+    justify-content: center !important;
+    text-align: center;
+  }
+  
+  .page-header-left {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .page-header-left h1 {
+    text-align: center;
+  }
+  
+  .header-balance-info {
+    flex-direction: row;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .header-balance-info .balance-item {
+    flex: 1;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    min-width: auto;
+  }
+  
+  .header-balance-info .balance-value {
+    font-size: 0.9rem;
+  }
+}
+
+
+
+
+/* Dashboard mobile adaptations */
+@media (max-width: 768px) {
+  .page-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .page-header h1 {
+    text-align: center;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 10000;
+    background: rgb(44 40 40 / 21%);
+    width: 280px;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    pointer-events: none;
+  }
+  
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+    pointer-events: auto;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .dashboard-top {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .card-balance .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .card-balance .card-header > div {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .card-balance .card-body {
+    padding: 1rem;
+  }
+  
+  .card-balance .balance-amount {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-balance .balance-invested {
+    font-size: 0.9rem;
+  }
+  
+  .card-points .card-body {
+    padding: 1rem;
+  }
+  
+  .card-points .card-body > div:first-child {
+    margin-bottom: 0.75rem;
+  }
+  
+  .card-points .card-body > div:nth-child(2) {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-points .card-body > div:nth-child(3),
+  .card-points .card-body > div:nth-child(4) {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+  
+  .card-referral-link .card-body {
+    padding: 1rem;
+  }
+  
+  .referral-link-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .referral-link-input {
+    width: 100%;
+    font-size: 0.85rem;
+  }
+  
+  .referral-link-buttons {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .referral-link-buttons button {
+    flex: 1;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Deposit page mobile improvements */
+@media (max-width: 768px) {
+  .deposit-grid {
+    gap: 1rem;
+  }
+  
+  .deposit-grid .card {
+    padding: 1rem;
+  }
+  
+  .deposit-balance {
+    order: -1; /* Move balance to top on mobile */
+  }
+  
+  .deposit-form {
+    gap: 1rem;
+  }
+  
+  .form-field {
+    margin-bottom: 1rem;
+  }
+  
+  .form-field input,
+  .form-field select {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .staking-toggle {
+    margin-bottom: 1rem;
+  }
+  
+  .toggle-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .calc-box {
+    margin-bottom: 1rem;
+  }
+  
+  .calc-row {
+    padding: 0.5rem 0;
+  }
+  
+  .deposit-item {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .deposit-item-main {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .deposit-right {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .deposit-title {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  
+  .deposit-meta {
+    font-size: 0.8rem;
+  }
+  
+  .deposit-amount {
+    font-size: 1.1rem;
+  }
+  
+  .deposit-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .deposit-footer span {
+    font-size: 0.8rem;
+  }
+  
+  .btn-small {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .deposit-balance .card-body {
+    padding: 1rem;
+  }
+  
+  .balance-item {
+    padding: 0.5rem;
+  }
+  
+  .balance-value {
+    font-size: 1.3rem;
+  }
+  
+  .deposit-form {
+    gap: 0.75rem;
+  }
+  
+  .form-field input,
+  .form-field select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .toggle-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .btn-primary {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .deposit-item {
+    padding: 0.75rem;
+  }
+  
+  .deposit-title {
+    font-size: 0.9rem;
+  }
+  
+  .deposit-meta {
+    font-size: 0.75rem;
+  }
+  
+  .deposit-amount {
+    font-size: 1rem;
+  }
+  
+  .deposit-footer span {
+    font-size: 0.75rem;
+  }
+  
+  .btn-small {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Extra small screens for Dashboard */
+@media (max-width: 480px) {
+  .dashboard-top {
+    gap: 0.75rem;
+  }
+  
+  .card {
+    padding: 0.75rem;
+  }
+  
+  .card-header {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+  
+  .card-body {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+  
+  .card-balance .balance-amount {
+    font-size: 1.5rem;
+  }
+  
+  .card-points .card-body > div:nth-child(2) {
+    font-size: 1.3rem;
+  }
+  
+  .referral-link-buttons {
+    flex-direction: column;
+  }
+  
+  .referral-link-buttons button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .referral-link-buttons button:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Transaction table mobile improvements */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container table {
+    min-width: 600px;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8rem;
+  }
+  
+  .table-container th:first-child,
+  .table-container td:first-child {
+    padding-left: 0.5rem;
+  }
+  
+  .table-container th:last-child,
+  .table-container td:last-child {
+    padding-right: 0.5rem;
+  }
+}
+
+/* =============================================================
+   Loading States & Spinners
+   ============================================================= */
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(5, 10, 28, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: inherit;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-color);
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: var(--muted-color);
+}
+
+.card.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.card.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(5, 10, 28, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.btn.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: currentColor;
+  animation: spin 1s ease-in-out infinite;
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* =============================================================
+   Notifications & Toast Messages
+   ============================================================= */
+
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.notification {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  animation: slideInRight 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.notification::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary-color);
+}
+
+.notification.success::before {
+  background: #51cf66;
+}
+
+.notification.error::before {
+  background: #ff6b6b;
+}
+
+.notification.warning::before {
+  background: #ffd43b;
+}
+
+.notification.info::before {
+  background: #74c0fc;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.notification.success .notification-icon {
+  background: rgba(81, 207, 102, 0.2);
+  color: #51cf66;
+}
+
+.notification.error .notification-icon {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}
+
+.notification.warning .notification-icon {
+  background: rgba(255, 212, 59, 0.2);
+  color: #ffd43b;
+}
+
+.notification.info .notification-icon {
+  background: rgba(116, 192, 252, 0.2);
+  color: #74c0fc;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.notification-message {
+  font-size: 0.85rem;
+  color: var(--muted-color);
+  line-height: 1.4;
+}
+
+.notification-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--muted-color);
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.notification-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification.removing {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+/* Mobile adjustments for notifications */
+@media (max-width: 768px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .notification {
+    padding: 0.75rem;
   }
 }
 

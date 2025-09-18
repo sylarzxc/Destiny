@@ -76,11 +76,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlayEl = document.querySelector('.mobile-overlay');
     const closeSidebar = () => {
       document.body.classList.remove('sidebar-open');
-      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+      if (menuBtn) {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.classList.remove('active');
+      }
     };
     const openSidebar = () => {
       document.body.classList.add('sidebar-open');
-      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+      if (menuBtn) {
+        menuBtn.setAttribute('aria-expanded', 'true');
+        menuBtn.classList.add('active');
+      }
     };
 
     if (menuBtn) {
@@ -178,11 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const closeSidebar = () => {
       document.body.classList.remove('sidebar-open');
-      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+      if (menuBtn) {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.classList.remove('active');
+      }
     };
     const openSidebar = () => {
       document.body.classList.add('sidebar-open');
-      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+      if (menuBtn) {
+        menuBtn.setAttribute('aria-expanded', 'true');
+        menuBtn.classList.add('active');
+      }
     };
 
     if (menuBtn && !menuBtn.dataset.bound) {
@@ -195,7 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlayEl && !overlayEl.dataset.bound) {
       overlayEl.addEventListener('click', () => {
         document.body.classList.remove('sidebar-open');
-        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+        if (menuBtn) {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.classList.remove('active');
+        }
       });
       overlayEl.dataset.bound = '1';
     }
@@ -204,7 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
           document.body.classList.remove('sidebar-open');
-          if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+          if (menuBtn) {
+            menuBtn.setAttribute('aria-expanded', 'false');
+            menuBtn.classList.remove('active');
+          }
         }
       });
       document.body.dataset.escBound = '1';
@@ -216,7 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isMobile()) {
             setTimeout(() => {
               document.body.classList.remove('sidebar-open');
-              if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+              if (menuBtn) {
+                menuBtn.setAttribute('aria-expanded', 'false');
+                menuBtn.classList.remove('active');
+              }
             }, 120);
           }
         });
@@ -227,6 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const destroyMobileUI = () => {
     document.body.classList.remove('sidebar-open');
+    const menuBtn = document.querySelector('.mobile-topbar .menu-toggle');
+    if (menuBtn) menuBtn.classList.remove('active');
     const topbar = document.querySelector('.mobile-topbar');
     const overlay = document.querySelector('.mobile-overlay');
     if (topbar) topbar.remove();

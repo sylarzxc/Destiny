@@ -140,7 +140,8 @@
         addresses: document.getElementById('setAddresses'),
         minDeposit: document.getElementById('setMinDeposit'),
         saveAddresses: document.getElementById('saveAddresses'),
-        saveMin: document.getElementById('saveMin')
+        saveMin: document.getElementById('saveMin'),
+        accrueInterest: document.getElementById('accrueInterest')
       },
       drawer: {
         root: document.getElementById('userDetailDrawer'),
@@ -787,6 +788,61 @@
     });
     els.drawer.debit?.addEventListener('click', () => {
       if (state.currentDetail) adjustWallet(state.currentDetail, 'debit');
+    });
+
+    // Daily interest accrual button
+    els.settings.accrueInterest?.addEventListener('click', async () => {
+      const btn = els.settings.accrueInterest;
+      const status = document.getElementById('accrualStatus');
+      
+      if (!btn || !status) return;
+      
+      // Show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Processing...';
+      status.textContent = 'Accruing daily interest...';
+      status.style.color = '#8a8fa7';
+      
+      try {
+        const { data, error } = await window.sb.rpc('admin_accrue_daily_interest');
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data && data.length > 0) {
+          const totalInterest = data.reduce((sum, row) => sum + Number(row.daily_interest || 0), 0);
+          const affectedStakes = data.length;
+          
+          status.innerHTML = `
+            <i class="fas fa-check-circle" style="color: #51cf66; margin-right: 0.5rem;"></i>
+            Success! Accrued $${totalInterest.toFixed(4)} interest for ${affectedStakes} deposits
+          `;
+          status.style.color = '#51cf66';
+          
+          // Refresh data
+          await loadSummary();
+          await loadStakes();
+        } else {
+          status.innerHTML = `
+            <i class="fas fa-info-circle" style="color: #8a8fa7; margin-right: 0.5rem;"></i>
+            No active deposits found for interest accrual
+          `;
+          status.style.color = '#8a8fa7';
+        }
+        
+      } catch (error) {
+        console.error('Interest accrual error:', error);
+        status.innerHTML = `
+          <i class="fas fa-exclamation-circle" style="color: #ff6b6b; margin-right: 0.5rem;"></i>
+          Error: ${error.message || 'Failed to accrue interest'}
+        `;
+        status.style.color = '#ff6b6b';
+      } finally {
+        // Reset button state
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-coins" style="margin-right: 0.5rem;"></i>Accrue Daily Interest';
+      }
     });
 
     await loadSummary();

@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="cabinet.css" />
   </head>
   <body>
@@ -222,6 +223,19 @@
               </div>
             </div>
             <div class="card-body" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
+              <!-- Daily Interest Accrual -->
+              <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
+                <div style="font-weight:600; margin-bottom:.5rem; color: #51cf66;">Daily Interest Management</div>
+                <div style="color:#8a8fa7; font-size:.85rem; margin-bottom:1rem;">Manually trigger daily interest accrual for all active deposits. This should be run once per day.</div>
+                <div style="display:flex; gap:.5rem; align-items:center;">
+                  <button class="page-btn" id="accrueInterest" style="background: linear-gradient(90deg, #51cf66, #40c057); border: none;">
+                    <i class="fas fa-coins" style="margin-right: 0.5rem;"></i>
+                    Accrue Daily Interest
+                  </button>
+                  <div id="accrualStatus" style="color:#8a8fa7; font-size:.85rem;"></div>
+                </div>
+              </div>
+              
               <div>
                 <div style="font-weight:600; margin-bottom:.3rem;">Deposit addresses (JSON)</div>
                 <textarea id="setAddresses" rows="8" style="width:100%; padding:.7rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:#e5e8ff; font-family: ui-monospace, Consolas, monospace;"></textarea>
