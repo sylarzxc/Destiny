@@ -146,7 +146,7 @@ export function Deposit() {
       // In a real implementation, you'd need to create these plans in the database first
       const stakeId = await createStake({
         plan_id: selectedPlanDetails.id,
-        amount: amount,
+        amount: parseFloat(amount),
         currency: selectedCrypto
       });
 

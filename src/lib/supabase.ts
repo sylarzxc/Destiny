@@ -16,6 +16,7 @@ export type Profile = {
   display_name: string | null
   role: string
   created_at: string
+  referral_code?: string
 }
 
 export type Wallet = {

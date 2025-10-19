@@ -101,7 +101,7 @@ export function useWalletActions() {
 
       const { data, error } = await supabase.rpc('open_stake', {
         p_plan_id: params.plan_id,
-        p_amount: parseFloat(params.amount),
+        p_amount: params.amount,
         p_currency: params.currency || 'USDT',
         p_flex_days: params.flex_days || null
       });
@@ -152,7 +152,7 @@ export function useWalletActions() {
 
       const { data, error } = await supabase.rpc('transfer_funds', {
         p_to_user_email: params.to_user_email,
-        p_amount: parseFloat(params.amount),
+        p_amount: params.amount,
         p_currency: params.currency || 'USDT',
         p_note: params.note || null
       });
@@ -671,7 +671,7 @@ export function useAdminActions() {
       const { data, error } = await supabase.rpc('admin_credit_wallet', {
         p_user_id: params.user_id,
         p_currency: params.currency,
-        p_amount: parseFloat(params.amount),
+        p_amount: params.amount,
         p_note: params.note || null
       });
 
@@ -696,7 +696,7 @@ export function useAdminActions() {
       const { data, error } = await supabase.rpc('admin_debit_wallet', {
         p_user_id: params.user_id,
         p_currency: params.currency,
-        p_amount: parseFloat(params.amount),
+        p_amount: params.amount,
         p_note: params.note || null
       });
 

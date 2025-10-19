@@ -103,7 +103,7 @@ export function Send() {
       
       const transactionId = await transferFunds({
         to_user_email: recipientEmail,
-        amount: amount,
+        amount: parseFloat(amount),
         currency: selectedCrypto,
         note: note || undefined
       });
