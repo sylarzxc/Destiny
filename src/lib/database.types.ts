@@ -3,6 +3,38 @@
 // Professional Supabase Cabinet Implementation
 // =============================================================
 
+export interface Database {
+  public: {
+    Tables: {
+      wallets: {
+        Row: Wallet;
+        Insert: Omit<Wallet, 'updated_at'>;
+        Update: Partial<Omit<Wallet, 'user_id' | 'updated_at'>>;
+      };
+      stakes: {
+        Row: Stake;
+        Insert: Omit<Stake, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Stake, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      transactions: {
+        Row: Transaction;
+        Insert: Omit<Transaction, 'id' | 'created_at'>;
+        Update: Partial<Omit<Transaction, 'id' | 'user_id' | 'created_at'>>;
+      };
+      referrals: {
+        Row: Referral;
+        Insert: Omit<Referral, 'id' | 'created_at'>;
+        Update: Partial<Omit<Referral, 'id' | 'created_at'>>;
+      };
+      profiles: {
+        Row: Profile;
+        Insert: Omit<Profile, 'created_at'>;
+        Update: Partial<Omit<Profile, 'id' | 'created_at'>>;
+      };
+    };
+  };
+}
+
 export interface Profile {
   id: string;
   email: string | null;

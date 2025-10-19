@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Trophy, Medal, Award, TrendingUp, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';

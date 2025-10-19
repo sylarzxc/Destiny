@@ -1,6 +1,5 @@
-import React from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 export function Gallery() {
   const projects = [

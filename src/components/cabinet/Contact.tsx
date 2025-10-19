@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { Textarea } from '../../ui/textarea';
-import { Label } from '../../ui/label';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-import { Card, CardContent } from '../../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { toast } from 'sonner';
 
 export function Contact() {

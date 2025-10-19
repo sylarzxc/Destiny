@@ -1,6 +1,5 @@
-import React from 'react';
 import { Zap, Shield, Users, Rocket, Clock, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '../../ui/card';
+import { Card, CardContent } from '../ui/card';
 
 export function Features() {
   const features = [
