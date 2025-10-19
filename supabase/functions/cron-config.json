@@ -1,0 +1,37 @@
+{
+  "cron": {
+    "daily-interest-cron": {
+      "schedule": "0 0 * * *",
+      "description": "Daily interest accrual for all active stakes",
+      "timezone": "UTC"
+    }
+  },
+  "functions": {
+    "daily-interest-cron": {
+      "description": "Automatically calculate and accrue daily staking yields",
+      "schedule": "0 0 * * *",
+      "timezone": "UTC",
+      "enabled": true,
+      "retryPolicy": {
+        "maxRetries": 3,
+        "retryDelay": "5m"
+      },
+      "notifications": {
+        "onSuccess": false,
+        "onFailure": true,
+        "webhook": null
+      }
+    }
+  },
+  "monitoring": {
+    "logLevel": "info",
+    "metrics": {
+      "enabled": true,
+      "retention": "30d"
+    },
+    "alerts": {
+      "enabled": true,
+      "channels": ["email", "webhook"]
+    }
+  }
+}

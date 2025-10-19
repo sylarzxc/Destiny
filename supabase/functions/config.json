@@ -1,0 +1,24 @@
+{
+  "functions": {
+    "calculate-staking-yields": {
+      "description": "Calculate and accrue daily staking yields for all active stakes",
+      "cron": "0 0 * * *"
+    },
+    "create-stake": {
+      "description": "Create a new staking position for a user"
+    },
+    "complete-stake": {
+      "description": "Complete/withdraw a staking position"
+    },
+    "transfer-funds": {
+      "description": "Transfer funds between users"
+    },
+    "use-referral-code": {
+      "description": "Apply a referral code to get bonus"
+    },
+    "daily-interest-cron": {
+      "description": "Cron job for daily interest accrual",
+      "cron": "0 0 * * *"
+    }
+  }
+}
