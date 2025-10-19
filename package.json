@@ -48,8 +48,7 @@
     "react-router-dom": "^7.9.4",
     "recharts": "^3.3.0",
     "sonner": "^2.0.7",
-02:09:32.010 src/components/CabinetApp.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
-02:09:32.011 src/components/CabinetApp.tsx(102,11): error TS2322: Type '{ currentPage: string; onPageChange: (page: string) => void; onClose: () => void; isMobileOpen: boolean; onMobileClose: () => void; user: AuthUser | null; profile: Profile | null; onLogout: () => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & AdminSidebarProps'.    "tailwind-merge": "^1.14.0",
+    "tailwind-merge": "^1.14.0",
     "react-day-picker": "^8.9.1",
     "embla-carousel-react": "^8.0.0",
     "cmdk": "^1.1.1",
