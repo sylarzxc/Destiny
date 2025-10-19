@@ -860,3 +860,6 @@ export function useRealtimeStakes() {
     };
   }, [user, refetch]);
 }
+
+// Re-export types for external use
+export type { StakeWithPlan };

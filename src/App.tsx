@@ -1,12 +1,11 @@
-import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import DashboardPage from './pages/DashboardPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import ProtectedRoute from './components/auth/ProtectedRoute'
-import CabinetApp from './components/CabinetApp'
+import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { CabinetApp } from './components/CabinetApp'
 
 function App() {
   return (
