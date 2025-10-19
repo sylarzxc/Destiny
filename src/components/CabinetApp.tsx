@@ -99,9 +99,6 @@ export function CabinetApp() {
           onClose={handleAdminClose}
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
-          user={user}
-          profile={profile}
-          onLogout={handleLogout}
         />
       );
     } else {
