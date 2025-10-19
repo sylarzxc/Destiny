@@ -149,9 +149,9 @@ export function Dashboard() {
       
       // Add deposits and subtract withdrawals
       const monthlyChange = monthTransactions.reduce((sum, tx) => {
-        if (tx.type === 'deposit' || tx.type === 'stake_created') {
+        if (tx.type === 'deposit' || tx.type === 'stake_create') {
           return sum + tx.amount;
-        } else if (tx.type === 'withdrawal' || tx.type === 'transfer_out') {
+        } else if (tx.type === 'withdraw' || tx.type === 'transfer_out') {
           return sum - tx.amount;
         }
         return sum;

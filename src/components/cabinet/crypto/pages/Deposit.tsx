@@ -329,7 +329,7 @@ export function Deposit() {
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Total to receive:</span>
                     <span className="text-white text-lg font-semibold">
-                      {amount ? `${(parseFloat(amount) + parseFloat(rewards.total)).toFixed(2)}` : '0'} {selectedCrypto}
+                      {amount ? `${(parseFloat(amount) + (typeof rewards.total === 'string' ? parseFloat(rewards.total) : rewards.total)).toFixed(2)}` : '0'} {selectedCrypto}
                     </span>
                   </div>
                 )}

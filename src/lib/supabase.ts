@@ -1,5 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Declare Vite environment variables
+declare global {
+  interface ImportMeta {
+    env: {
+      VITE_SUPABASE_URL: string
+      VITE_SUPABASE_ANON_KEY: string
+    }
+  }
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
@@ -46,6 +56,32 @@ export type Stake = {
   yield_accumulated: number
   currency: string
   flex_days: number | null
+}
+
+export type StakeWithPlan = Stake & {
+  plan?: Plan
+}
+
+export type TransferFundsParams = {
+  to_user_email: string
+  amount: number
+  currency: string
+  note?: string
+}
+
+export type OpenStakeParams = {
+  plan_id: string
+  amount: number
+  currency: string
+  flex_days?: number
+}
+
+export type WithdrawStakeParams = {
+  stake_id: number
+}
+
+export type UseReferralCodeParams = {
+  referral_code: string
 }
 
 export type Transaction = {

@@ -105,7 +105,7 @@ export function Leaderboard() {
               <Medal className="text-slate-300" size={32} />
             </div>
             <div className="text-white mb-1 text-center text-sm md:text-base">{topStakers[1].user}</div>
-            <Badge className={getBadgeColor(topStakers[1].badge)} className="text-xs">
+            <Badge className={`${getBadgeColor(topStakers[1].badge)} text-xs`}>
               {topStakers[1].badge}
             </Badge>
             <div className="text-slate-400 mt-2 md:mt-3 text-sm">{topStakers[1].totalStaked}</div>
@@ -120,7 +120,7 @@ export function Leaderboard() {
               <Trophy className="text-yellow-400" size={40} />
             </div>
             <div className="text-white mb-1 text-center text-sm md:text-base">{topStakers[0].user}</div>
-            <Badge className={getBadgeColor(topStakers[0].badge)} className="text-xs">
+            <Badge className={`${getBadgeColor(topStakers[0].badge)} text-xs`}>
               {topStakers[0].badge}
             </Badge>
             <div className="text-slate-400 mt-2 md:mt-3 text-sm">{topStakers[0].totalStaked}</div>
@@ -135,7 +135,7 @@ export function Leaderboard() {
               <Award className="text-orange-400" size={28} />
             </div>
             <div className="text-white mb-1 text-center text-sm md:text-base">{topStakers[2].user}</div>
-            <Badge className={getBadgeColor(topStakers[2].badge)} className="text-xs">
+            <Badge className={`${getBadgeColor(topStakers[2].badge)} text-xs`}>
               {topStakers[2].badge}
             </Badge>
             <div className="text-slate-400 mt-2 md:mt-3 text-sm">{topStakers[2].totalStaked}</div>

@@ -100,7 +100,7 @@ export function useWalletActions() {
       setError(null);
 
       const { data, error } = await supabase.rpc('open_stake', {
-        p_plan_id: params.plan_id,
+        p_plan_id: params.plan_id.toString(),
         p_amount: params.amount,
         p_currency: params.currency || 'USDT',
         p_flex_days: params.flex_days || null
