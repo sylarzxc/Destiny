@@ -1,0 +1,910 @@
+-- =============================================================
+-- Destiny Platform Enhanced Database Schema
+-- Professional Supabase Cabinet Implementation
+-- =============================================================
+
+-- ============
+-- Core Tables
+-- ============
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  display_name text,
+  role text default 'user',
+  referral_code text unique,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.plans (
+  id bigserial primary key,
+  name text not null,
+  days int not null,
+  apr numeric not null,
+  type text not null check (type in ('locked','flexible')),
+  currency text default 'USDT'
+);
+
+create table if not exists public.stakes (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  plan_id bigint references public.plans(id),
+  amount numeric not null,
+  start_at timestamptz default now(),
+  end_at timestamptz,
+  status text default 'active' check (status in ('active','completed','cancelled')),
+  yield_accumulated numeric default 0,
+  currency text default 'USDT',
+  flex_days int
+);
+
+create table if not exists public.transactions (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  type text not null check (type in ('deposit','withdraw','stake_create','stake_yield','transfer_in','transfer_out')),
+  amount numeric not null,
+  currency text default 'USDT',
+  created_at timestamptz default now(),
+  from_user_id uuid references profiles(id),
+  to_user_id uuid references profiles(id),
+  stake_id bigint references stakes(id),
+  meta jsonb default '{}'::jsonb
+);
+
+create table if not exists public.settings (
+  key text primary key,
+  value jsonb not null
+);
+
+create table if not exists public.wallets (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  currency text not null,
+  available numeric not null default 0,
+  locked numeric not null default 0,
+  updated_at timestamptz default now(),
+  primary key (user_id, currency)
+);
+
+create table if not exists public.referrals (
+  id bigserial primary key,
+  referrer_id uuid references profiles(id) on delete cascade,
+  referred_id uuid references profiles(id) on delete cascade,
+  referral_code text not null unique,
+  created_at timestamptz default now(),
+  bonus_paid boolean default false
+);
+
+create table if not exists public.admin_logs (
+  id bigserial primary key,
+  admin_id uuid references auth.users(id) on delete set null,
+  action text not null,
+  target_type text,
+  target_id text,
+  meta jsonb,
+  created_at timestamptz default now()
+);
+
+-- ==================================
+-- Enhanced Automatic profile + wallet seeding
+-- ==================================
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_referral_code text;
+begin
+  -- Generate unique referral code
+  v_referral_code := upper(substring(md5(random()::text) from 1 for 8));
+  
+  -- Ensure referral code is unique
+  while exists (select 1 from public.profiles where referral_code = v_referral_code) loop
+    v_referral_code := upper(substring(md5(random()::text) from 1 for 8));
+  end loop;
+
+  insert into public.profiles (id, email, referral_code)
+  values (new.id, new.email, v_referral_code)
+  on conflict do nothing;
+
+  -- Create initial demo wallets with $2000 total
+  begin
+    insert into public.wallets (user_id, currency, available) values
+      (new.id, 'ETH', 800),
+      (new.id, 'BTC', 500),
+      (new.id, 'USDT', 400),
+      (new.id, 'BNB', 200),
+      (new.id, 'MATIC', 100)
+    on conflict (user_id, currency) do nothing;
+  exception when others then
+    null;
+  end;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Backfill demo wallets for existing users
+insert into public.wallets (user_id, currency, available)
+select u.id, 'ETH', 800
+from auth.users u
+where not exists (
+  select 1 from public.wallets w
+  where w.user_id = u.id and w.currency = 'ETH'
+);
+
+insert into public.wallets (user_id, currency, available)
+select u.id, 'BTC', 500
+from auth.users u
+where not exists (
+  select 1 from public.wallets w
+  where w.user_id = u.id and w.currency = 'BTC'
+);
+
+insert into public.wallets (user_id, currency, available)
+select u.id, 'USDT', 400
+from auth.users u
+where not exists (
+  select 1 from public.wallets w
+  where w.user_id = u.id and w.currency = 'USDT'
+);
+
+insert into public.wallets (user_id, currency, available)
+select u.id, 'BNB', 200
+from auth.users u
+where not exists (
+  select 1 from public.wallets w
+  where w.user_id = u.id and w.currency = 'BNB'
+);
+
+insert into public.wallets (user_id, currency, available)
+select u.id, 'MATIC', 100
+from auth.users u
+where not exists (
+  select 1 from public.wallets w
+  where w.user_id = u.id and w.currency = 'MATIC'
+);
+
+-- =====================
+-- Row Level Security
+-- =====================
+alter table public.profiles enable row level security;
+alter table public.stakes enable row level security;
+alter table public.transactions enable row level security;
+alter table public.wallets enable row level security;
+alter table public.admin_logs enable row level security;
+alter table public.settings enable row level security;
+alter table public.plans enable row level security;
+alter table public.referrals enable row level security;
+
+do $$
+begin
+  -- Profile policies
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'profiles_select_self') then
+    create policy profiles_select_self on public.profiles
+      for select using (id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'profiles_update_self') then
+    create policy profiles_update_self on public.profiles
+      for update using (id = auth.uid());
+  end if;
+
+  -- Stakes policies
+  if not exists (select 1 from pg_policies where tablename = 'stakes' and policyname = 'stakes_select_self') then
+    create policy stakes_select_self on public.stakes
+      for select using (user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'stakes' and policyname = 'stakes_insert_self') then
+    create policy stakes_insert_self on public.stakes
+      for insert with check (user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'stakes' and policyname = 'stakes_update_self') then
+    create policy stakes_update_self on public.stakes
+      for update using (user_id = auth.uid());
+  end if;
+
+  -- Transactions policies
+  if not exists (select 1 from pg_policies where tablename = 'transactions' and policyname = 'transactions_select_self') then
+    create policy transactions_select_self on public.transactions
+      using (user_id = auth.uid() or from_user_id = auth.uid() or to_user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'transactions' and policyname = 'transactions_insert_self') then
+    create policy transactions_insert_self on public.transactions
+      for insert with check (user_id = auth.uid());
+  end if;
+
+  -- Wallet policies - users can only see their own wallets
+  if not exists (select 1 from pg_policies where tablename = 'wallets' and policyname = 'wallets_select_self') then
+    create policy wallets_select_self on public.wallets
+      for select using (user_id = auth.uid());
+  end if;
+  -- Users cannot directly update wallets (only through functions)
+  if not exists (select 1 from pg_policies where tablename = 'wallets' and policyname = 'wallets_update_restricted') then
+    create policy wallets_update_restricted on public.wallets
+      for update using (false);
+  end if;
+
+  -- Referrals policies
+  if not exists (select 1 from pg_policies where tablename = 'referrals' and policyname = 'referrals_select_own') then
+    create policy referrals_select_own on public.referrals
+      for select using (referrer_id = auth.uid() or referred_id = auth.uid());
+  end if;
+  -- Only system can create referrals
+  if not exists (select 1 from pg_policies where tablename = 'referrals' and policyname = 'referrals_insert_system') then
+    create policy referrals_insert_system on public.referrals
+      for insert with check (false);
+  end if;
+
+  -- Admin logs readable only by admin
+  if not exists (select 1 from pg_policies where tablename = 'admin_logs' and policyname = 'admin_logs_admin_only') then
+    create policy admin_logs_admin_only on public.admin_logs
+      using (public.is_admin());
+  end if;
+
+  -- Settings / plans
+  if not exists (select 1 from pg_policies where tablename = 'settings' and policyname = 'settings_public_select') then
+    create policy settings_public_select on public.settings for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'settings' and policyname = 'settings_admin_write') then
+    create policy settings_admin_write on public.settings for all using (public.is_admin()) with check (public.is_admin());
+  end if;
+
+  if not exists (select 1 from pg_policies where tablename = 'plans' and policyname = 'plans_public_select') then
+    create policy plans_public_select on public.plans for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'plans' and policyname = 'plans_admin_write') then
+    create policy plans_admin_write on public.plans for all using (public.is_admin()) with check (public.is_admin());
+  end if;
+
+  -- Admin access to all profiles
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'admin_all_access') then
+    create policy admin_all_access on public.profiles
+      for all using (
+        exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
+      );
+  end if;
+end
+$$;
+
+-- =============
+-- Enhanced Seeded Plans for Multiple Currencies
+-- =============
+insert into public.plans (name, days, apr, type, currency) values
+  -- ETH Plans
+  ('ETH Locked 30', 30, 0.05, 'locked', 'ETH'),
+  ('ETH Locked 90', 90, 0.12, 'locked', 'ETH'),
+  ('ETH Locked 180', 180, 0.20, 'locked', 'ETH'),
+  ('ETH Flexible Daily', 1, 0.20, 'flexible', 'ETH'),
+  
+  -- BTC Plans
+  ('BTC Locked 30', 30, 0.05, 'locked', 'BTC'),
+  ('BTC Locked 90', 90, 0.12, 'locked', 'BTC'),
+  ('BTC Locked 180', 180, 0.20, 'locked', 'BTC'),
+  ('BTC Flexible Daily', 1, 0.20, 'flexible', 'BTC'),
+  
+  -- USDT Plans
+  ('USDT Locked 30', 30, 0.05, 'locked', 'USDT'),
+  ('USDT Locked 90', 90, 0.12, 'locked', 'USDT'),
+  ('USDT Locked 180', 180, 0.20, 'locked', 'USDT'),
+  ('USDT Flexible Daily', 1, 0.20, 'flexible', 'USDT'),
+  
+  -- BNB Plans
+  ('BNB Locked 30', 30, 0.05, 'locked', 'BNB'),
+  ('BNB Locked 90', 90, 0.12, 'locked', 'BNB'),
+  ('BNB Locked 180', 180, 0.20, 'locked', 'BNB'),
+  ('BNB Flexible Daily', 1, 0.20, 'flexible', 'BNB'),
+  
+  -- MATIC Plans
+  ('MATIC Locked 30', 30, 0.05, 'locked', 'MATIC'),
+  ('MATIC Locked 90', 90, 0.12, 'locked', 'MATIC'),
+  ('MATIC Locked 180', 180, 0.20, 'locked', 'MATIC'),
+  ('MATIC Flexible Daily', 1, 0.20, 'flexible', 'MATIC')
+on conflict do nothing;
+
+-- ========================
+-- Utility helper functions
+-- ========================
+create or replace function public.is_admin()
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text;
+begin
+  select role into v_role
+  from public.profiles
+  where id = auth.uid();
+  return lower(coalesce(v_role, 'user')) = 'admin';
+end;
+$$;
+
+-- =================================
+-- Enhanced User-facing RPC Functions
+-- =================================
+create or replace function public.open_stake(
+  p_plan_id bigint,
+  p_amount numeric,
+  p_currency text default 'USDT',
+  p_flex_days int default null
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_plan public.plans%rowtype;
+  v_stake_id bigint;
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  if coalesce(p_amount, 0) <= 0 then
+    raise exception 'amount must be > 0';
+  end if;
+
+  select * into v_plan from public.plans where id = p_plan_id;
+  if not found then
+    raise exception 'plan not found';
+  end if;
+
+  -- Check if currency matches plan
+  if v_plan.currency != coalesce(p_currency, 'USDT') then
+    raise exception 'currency mismatch with plan';
+  end if;
+
+  insert into public.wallets (user_id, currency)
+  values (auth.uid(), coalesce(p_currency, 'USDT'))
+  on conflict do nothing;
+
+  update public.wallets
+     set available = available - p_amount,
+         locked = locked + p_amount,
+         updated_at = now()
+   where user_id = auth.uid()
+     and currency = coalesce(p_currency, 'USDT')
+     and available >= p_amount;
+  if not found then
+    raise exception 'insufficient funds';
+  end if;
+
+  insert into public.stakes (user_id, plan_id, amount, status, start_at, currency, flex_days)
+  values (auth.uid(), p_plan_id, p_amount, 'active', now(), coalesce(p_currency, 'USDT'), p_flex_days)
+  returning id into v_stake_id;
+
+  insert into public.transactions (user_id, type, amount, currency, stake_id, meta)
+  values (
+    auth.uid(),
+    'stake_create',
+    p_amount,
+    coalesce(p_currency, 'USDT'),
+    v_stake_id,
+    jsonb_build_object('plan_id', p_plan_id, 'plan_name', v_plan.name)
+  );
+
+  return v_stake_id;
+end;
+$$;
+
+create or replace function public.withdraw_stake(
+  p_stake_id bigint
+)
+returns numeric
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_stake public.stakes%rowtype;
+  v_amount numeric;
+begin
+  select * into v_stake
+    from public.stakes
+   where id = p_stake_id
+     and user_id = auth.uid()
+     and status = 'active'
+     for update;
+  if not found then
+    raise exception 'stake not found or already closed';
+  end if;
+
+  if v_stake.end_at is not null and v_stake.end_at > now() then
+    raise exception 'stake still locked';
+  end if;
+
+  update public.wallets
+     set locked = locked - v_stake.amount,
+         available = available + v_stake.amount + coalesce(v_stake.yield_accumulated, 0),
+         updated_at = now()
+   where user_id = v_stake.user_id
+     and currency = coalesce(v_stake.currency, 'USDT');
+
+  update public.stakes
+     set status = 'completed',
+         end_at = now()
+   where id = v_stake.id;
+
+  v_amount := v_stake.amount + coalesce(v_stake.yield_accumulated, 0);
+
+  insert into public.transactions (user_id, type, amount, currency, stake_id, meta)
+  values (
+    v_stake.user_id,
+    'withdraw',
+    v_amount,
+    coalesce(v_stake.currency, 'USDT'),
+    v_stake.id,
+    jsonb_build_object('yield_earned', coalesce(v_stake.yield_accumulated, 0))
+  );
+
+  return v_amount;
+end;
+$$;
+
+-- =================================
+-- Transfer Funds Between Users
+-- =================================
+create or replace function public.transfer_funds(
+  p_to_user_email text,
+  p_amount numeric,
+  p_currency text default 'USDT',
+  p_note text default null
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_to_user_id uuid;
+  v_transaction_id bigint;
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  if coalesce(p_amount, 0) <= 0 then
+    raise exception 'amount must be > 0';
+  end if;
+
+  -- Find recipient user
+  select id into v_to_user_id
+  from public.profiles
+  where email = p_to_user_email;
+  
+  if not found then
+    raise exception 'recipient user not found';
+  end if;
+  
+  if v_to_user_id = auth.uid() then
+    raise exception 'cannot transfer to yourself';
+  end if;
+
+  -- Check sender has sufficient funds
+  update public.wallets
+     set available = available - p_amount,
+         updated_at = now()
+   where user_id = auth.uid()
+     and currency = coalesce(p_currency, 'USDT')
+     and available >= p_amount;
+  if not found then
+    raise exception 'insufficient funds';
+  end if;
+
+  -- Add funds to recipient
+  insert into public.wallets (user_id, currency, available, updated_at)
+  values (v_to_user_id, coalesce(p_currency, 'USDT'), p_amount, now())
+  on conflict (user_id, currency)
+  do update set
+    available = wallets.available + p_amount,
+    updated_at = now();
+
+  -- Create outgoing transaction
+  insert into public.transactions (user_id, type, amount, currency, to_user_id, meta)
+  values (
+    auth.uid(),
+    'transfer_out',
+    p_amount,
+    coalesce(p_currency, 'USDT'),
+    v_to_user_id,
+    jsonb_build_object('note', p_note, 'recipient_email', p_to_user_email)
+  )
+  returning id into v_transaction_id;
+
+  -- Create incoming transaction
+  insert into public.transactions (user_id, type, amount, currency, from_user_id, meta)
+  values (
+    v_to_user_id,
+    'transfer_in',
+    p_amount,
+    coalesce(p_currency, 'USDT'),
+    auth.uid(),
+    jsonb_build_object('note', p_note, 'sender_email', (select email from public.profiles where id = auth.uid()))
+  );
+
+  return v_transaction_id;
+end;
+$$;
+
+-- =================================
+-- Referral System Functions
+-- =================================
+create or replace function public.use_referral_code(
+  p_referral_code text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_referrer_id uuid;
+  v_referrer_profile public.profiles%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+
+  -- Find referrer by code
+  select id into v_referrer_id
+  from public.profiles
+  where referral_code = upper(p_referral_code);
+  
+  if not found then
+    raise exception 'invalid referral code';
+  end if;
+  
+  if v_referrer_id = auth.uid() then
+    raise exception 'cannot use your own referral code';
+  end if;
+
+  -- Check if user already used a referral
+  if exists (select 1 from public.referrals where referred_id = auth.uid()) then
+    raise exception 'referral code already used';
+  end if;
+
+  -- Create referral relationship
+  insert into public.referrals (referrer_id, referred_id, referral_code)
+  values (v_referrer_id, auth.uid(), upper(p_referral_code));
+
+  -- Give bonus to referrer (10% of initial deposit)
+  insert into public.wallets (user_id, currency, available, updated_at)
+  values (v_referrer_id, 'USDT', 200, now())
+  on conflict (user_id, currency)
+  do update set
+    available = wallets.available + 200,
+    updated_at = now();
+
+  -- Record bonus transaction
+  insert into public.transactions (user_id, type, amount, currency, meta)
+  values (
+    v_referrer_id,
+    'deposit',
+    200,
+    'USDT',
+    jsonb_build_object('type', 'referral_bonus', 'referred_user', auth.uid())
+  );
+
+  return true;
+end;
+$$;
+
+-- =============================================================
+-- Enhanced Daily Interest Accrual Functions
+-- =============================================================
+
+-- Function to calculate daily interest for a stake
+create or replace function public.calculate_daily_interest(
+  p_stake_id bigint
+)
+returns numeric
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_stake record;
+  v_plan record;
+  v_daily_rate numeric;
+  v_daily_interest numeric;
+begin
+  -- Get stake details
+  select s.*, p.*
+  into v_stake
+  from public.stakes s
+  left join public.plans p on p.id = s.plan_id
+  where s.id = p_stake_id
+    and s.status = 'active';
+  
+  if not found then
+    return 0;
+  end if;
+  
+  -- Calculate daily rate based on plan type
+  if v_stake.type = 'flexible' then
+    -- Flexible: APR / 365 days
+    v_daily_rate := coalesce(v_stake.apr, 0) / 365;
+  else
+    -- Locked: APR / 365 days
+    v_daily_rate := coalesce(v_stake.apr, 0) / 365;
+  end if;
+  
+  -- Calculate daily interest
+  v_daily_interest := v_stake.amount * v_daily_rate;
+  
+  return v_daily_interest;
+end;
+$$;
+
+-- Function to accrue daily interest for all active stakes
+create or replace function public.accrue_daily_interest()
+returns table(
+  stake_id bigint,
+  user_id uuid,
+  daily_interest numeric,
+  new_balance numeric
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_stake record;
+  v_daily_interest numeric;
+  v_new_balance numeric;
+begin
+  -- Process all active stakes
+  for v_stake in 
+    select s.id, s.user_id, s.amount, s.yield_accumulated, s.currency
+    from public.stakes s
+    where s.status = 'active'
+  loop
+    -- Calculate daily interest
+    v_daily_interest := public.calculate_daily_interest(v_stake.id);
+    
+    if v_daily_interest > 0 then
+      -- For locked stakes, accumulate yield
+      if exists (select 1 from public.plans p join public.stakes s on s.plan_id = p.id where s.id = v_stake.id and p.type = 'locked') then
+        update public.stakes
+        set yield_accumulated = yield_accumulated + v_daily_interest,
+            updated_at = now()
+        where id = v_stake.id;
+      else
+        -- For flexible stakes, add to available balance
+        insert into public.wallets (user_id, currency, available, updated_at)
+        values (v_stake.user_id, v_stake.currency, v_daily_interest, now())
+        on conflict (user_id, currency)
+        do update set
+          available = wallets.available + v_daily_interest,
+          updated_at = now();
+      end if;
+      
+      -- Record transaction
+      insert into public.transactions (user_id, type, amount, currency, stake_id, meta)
+      values (
+        v_stake.user_id,
+        'stake_yield',
+        v_daily_interest,
+        v_stake.currency,
+        v_stake.id,
+        jsonb_build_object('yield_type', 'daily_interest')
+      );
+      
+      -- Get new balance
+      select available into v_new_balance
+      from public.wallets
+      where user_id = v_stake.user_id and currency = v_stake.currency;
+      
+      -- Return result
+      stake_id := v_stake.id;
+      user_id := v_stake.user_id;
+      daily_interest := v_daily_interest;
+      new_balance := v_new_balance;
+      return next;
+    end if;
+  end loop;
+end;
+$$;
+
+-- Function to manually trigger daily interest accrual (admin only)
+create or replace function public.admin_accrue_daily_interest()
+returns table(
+  stake_id bigint,
+  user_id uuid,
+  daily_interest numeric,
+  new_balance numeric
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only';
+  end if;
+  
+  return query select * from public.accrue_daily_interest();
+end;
+$$;
+
+-- =========================
+-- Enhanced Admin Functions
+-- =========================
+create or replace function public.admin_list_pending(
+  p_limit int default 20,
+  p_offset int default 0
+)
+returns table (
+  id bigint,
+  created_at timestamptz,
+  user_id uuid,
+  email text,
+  type text,
+  amount numeric,
+  currency text,
+  status text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only';
+  end if;
+
+  return query
+    select t.id,
+           t.created_at,
+           t.user_id,
+           coalesce(p.email, ''),
+           t.type,
+           t.amount,
+           coalesce(t.currency, 'USDT') as currency,
+           coalesce(t.meta->>'status', 'pending') as status
+      from public.transactions t
+      left join public.profiles p on p.id = t.user_id
+     where coalesce(t.meta->>'status', 'pending') = 'pending'
+     order by t.created_at desc
+     limit coalesce(p_limit, 20)
+    offset coalesce(p_offset, 0);
+end;
+$$;
+
+create or replace function public.admin_list_users(
+  p_limit int default 50,
+  p_offset int default 0,
+  p_search text default null
+)
+returns table (
+  id uuid,
+  email text,
+  display_name text,
+  role text,
+  referral_code text,
+  created_at timestamptz,
+  total_available numeric,
+  total_locked numeric,
+  active_stakes int,
+  pending_deposits int,
+  pending_withdraws int,
+  next_maturity timestamptz,
+  last_transaction timestamptz,
+  last_sign_in_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only';
+  end if;
+
+  return query
+    with filtered as (
+      select p.*
+      from public.profiles p
+      where (
+        p_search is null or p_search = '' or
+        p.email ilike '%' || p_search || '%' or
+        coalesce(p.display_name, '') ilike '%' || p_search || '%'
+      )
+      order by p.created_at desc
+      limit coalesce(p_limit, 50)
+      offset coalesce(p_offset, 0)
+    ),
+    wallet_totals as (
+      select user_id,
+             coalesce(sum(available), 0) as total_available,
+             coalesce(sum(locked), 0) as total_locked
+      from public.wallets
+      group by user_id
+    ),
+    stake_stats as (
+      select user_id,
+             count(*) filter (where status = 'active') as active_stakes,
+             min(end_at) filter (where status = 'active' and end_at is not null) as next_maturity
+      from public.stakes
+      group by user_id
+    ),
+    pending_tx as (
+      select user_id,
+             count(*) filter (where type = 'deposit' and coalesce(meta->>'status', 'pending') = 'pending') as pending_deposits,
+             count(*) filter (where type = 'withdraw' and coalesce(meta->>'status', 'pending') = 'pending') as pending_withdraws,
+             max(created_at) as last_transaction
+      from public.transactions
+      group by user_id
+    ),
+    auth_data as (
+      select id, last_sign_in_at from auth.users
+    )
+    select f.id,
+           f.email,
+           f.display_name,
+           f.role,
+           f.referral_code,
+           f.created_at,
+           coalesce(w.total_available, 0) as total_available,
+           coalesce(w.total_locked, 0) as total_locked,
+           coalesce(s.active_stakes, 0) as active_stakes,
+           coalesce(pt.pending_deposits, 0) as pending_deposits,
+           coalesce(pt.pending_withdraws, 0) as pending_withdraws,
+           s.next_maturity,
+           pt.last_transaction,
+           a.last_sign_in_at
+    from filtered f
+    left join wallet_totals w on w.user_id = f.id
+    left join stake_stats s on s.user_id = f.id
+    left join pending_tx pt on pt.user_id = f.id
+    left join auth_data a on a.id = f.id;
+end;
+$$;
+
+create or replace function public.admin_dashboard_overview()
+returns table (
+  total_users bigint,
+  total_wallet_available numeric,
+  total_wallet_locked numeric,
+  pending_requests bigint,
+  active_stakes bigint,
+  expiring_24h bigint,
+  total_active_deposit numeric,
+  total_referrals bigint
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only';
+  end if;
+
+  return query
+    select
+      (select count(*) from public.profiles) as total_users,
+      coalesce((select sum(available) from public.wallets), 0) as total_wallet_available,
+      coalesce((select sum(locked) from public.wallets), 0) as total_wallet_locked,
+      (select count(*) from public.transactions t where coalesce(t.meta->>'status', 'pending') = 'pending') as pending_requests,
+      (select count(*) from public.stakes s where s.status = 'active') as active_stakes,
+      (select count(*) from public.stakes s where s.status = 'active' and s.end_at is not null and s.end_at <= now() + interval '24 hours') as expiring_24h,
+      coalesce((select sum(amount) from public.stakes where status = 'active'), 0) as total_active_deposit,
+      (select count(*) from public.referrals) as total_referrals;
+end;
+$$;
+
+-- =============================================================
+-- Realtime Subscriptions
+-- =============================================================
+alter publication supabase_realtime add table public.profiles;
+alter publication supabase_realtime add table public.wallets;
+alter publication supabase_realtime add table public.transactions;
+alter publication supabase_realtime add table public.stakes;
+alter publication supabase_realtime add table public.admin_logs;
+alter publication supabase_realtime add table public.referrals;
