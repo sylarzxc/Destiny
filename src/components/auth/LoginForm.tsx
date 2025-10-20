@@ -100,26 +100,26 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
       transition={{ duration: 0.5 }}
       className="auth-form w-full max-w-md mx-auto"
     >
-      <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-3xl border border-slate-700/50 p-8 shadow-2xl shadow-blue-900/20">
+      <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-slate-700/50 p-4 sm:p-6 md:p-8 shadow-2xl shadow-blue-900/20">
         {/* Animated background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 rounded-3xl animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-cyan-600/10 rounded-2xl sm:rounded-3xl animate-pulse"></div>
 
         <div className="relative z-10">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             {/* Logo */}
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl font-bold text-white">D</span>
+            <div className="flex justify-center mb-3 sm:mb-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-xl sm:text-2xl font-bold text-white">D</span>
               </div>
             </div>
             
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
               Welcome Back
             </h2>
-            <p className="text-slate-400">Sign in to your Destiny account</p>
+            <p className="text-slate-400 text-sm sm:text-base">Sign in to your Destiny account</p>
           </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
               Email Address
@@ -133,13 +133,13 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
                 onBlur={handleEmailBlur}
                 placeholder="Enter your email"
                 autoComplete="email"
-                className={`w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-800/50 border border-slate-600 rounded-lg sm:rounded-xl text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 text-sm sm:text-base ${
                   emailError ? 'border-red-500 ring-2 ring-red-500/20' : ''
                 }`}
                 required
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                 </svg>
               </div>
@@ -148,9 +148,9 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
               <motion.p 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-red-400 text-sm mt-1 flex items-center gap-1"
+                className="text-red-400 text-xs sm:text-sm mt-1 flex items-center gap-1"
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 {emailError}
@@ -170,11 +170,11 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 autoComplete="current-password"
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-800/50 border border-slate-600 rounded-lg sm:rounded-xl text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 text-sm sm:text-base"
                 required
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
@@ -190,7 +190,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
               />
-              <span className="text-slate-300 text-sm">Remember me</span>
+              <span className="text-slate-300 text-xs sm:text-sm">Remember me</span>
             </label>
           </div>
 
@@ -200,7 +200,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
               animate={{ opacity: 1, y: 0 }}
               className="bg-red-500/10 border border-red-500/20 rounded-lg p-3"
             >
-              <p className="text-red-400 text-sm">{error}</p>
+              <p className="text-red-400 text-xs sm:text-sm">{error}</p>
             </motion.div>
           )}
 
@@ -211,16 +211,16 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white py-2.5 sm:py-3 px-6 rounded-lg sm:rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Signing In...
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
                   Sign In
@@ -230,18 +230,18 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToReset }: Lo
           </motion.div>
         </form>
 
-        <div className="mt-8 text-center space-y-4">
+        <div className="mt-6 sm:mt-8 text-center space-y-3 sm:space-y-4">
           <button
             onClick={onSwitchToReset}
-            className="text-blue-400 hover:text-blue-300 text-sm transition-colors duration-200 flex items-center justify-center gap-1 mx-auto"
+            className="text-blue-400 hover:text-blue-300 text-xs sm:text-sm transition-colors duration-200 flex items-center justify-center gap-1 mx-auto"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Forgot your password?
           </button>
           
-          <div className="text-slate-400 text-sm">
+          <div className="text-slate-400 text-xs sm:text-sm">
             Don't have an account?{' '}
             <button
               onClick={onSwitchToRegister}

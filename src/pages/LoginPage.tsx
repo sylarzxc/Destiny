@@ -14,7 +14,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex items-center justify-center relative overflow-hidden px-4 py-8">
       {/* Self-animating gradient background */}
       <div 
         className="absolute inset-0 opacity-80"
@@ -37,7 +37,7 @@ export function LoginPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/40"></div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-md mx-auto px-4">
+      <div className="relative z-10 w-full max-w-md mx-auto">
         <LoginForm
           onSuccess={handleSuccess}
           onSwitchToRegister={() => navigate('/register')}

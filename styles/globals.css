@@ -114,6 +114,68 @@
 /* Cabinet Styles */
 @import url('../styles/cabinet.css');
 
+/* Mobile-specific improvements */
+@layer utilities {
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 768px) {
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Better touch targets for mobile */
+  @media screen and (max-width: 768px) {
+    button,
+    .btn,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Improved mobile form spacing */
+  @media screen and (max-width: 768px) {
+    .auth-form {
+      padding: 1rem;
+    }
+    
+    .auth-form .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+  }
+
+  /* Better touch interactions */
+  @media screen and (max-width: 768px) {
+    button:active,
+    .btn:active,
+    [role="button"]:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  /* Prevent text selection on buttons for better mobile UX */
+  button,
+  .btn,
+  [role="button"] {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Custom Scrollbar Styles */
 @layer utilities {
   /* Покращений вертикальний скролбар */

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Login Test - Destiny</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .test-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .test-info {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .test-info h2 {
+            margin: 0 0 10px 0;
+            color: #60a5fa;
+        }
+        
+        .test-info p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .test-notes {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            color: white;
+        }
+        
+        .test-notes h3 {
+            margin: 0 0 10px 0;
+            color: #60a5fa;
+            font-size: 16px;
+        }
+        
+        .test-notes ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .test-notes li {
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 480px) {
+            .test-container {
+                padding: 15px;
+            }
+            
+            .iframe-container {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-info">
+            <h2>Mobile Login Test</h2>
+            <p>Testing Destiny login functionality on mobile devices</p>
+        </div>
+        
+        <div class="iframe-container">
+            <iframe src="http://localhost:5173/login" title="Destiny Login"></iframe>
+        </div>
+        
+        <div class="test-notes">
+            <h3>Test Checklist:</h3>
+            <ul>
+                <li>✓ Form fields are properly sized for mobile</li>
+                <li>✓ No zoom occurs when focusing on inputs</li>
+                <li>✓ Touch targets are at least 44px</li>
+                <li>✓ Responsive design works on different screen sizes</li>
+                <li>✓ Login functionality works correctly</li>
+                <li>✓ Error messages display properly</li>
+                <li>✓ Loading states work on mobile</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
