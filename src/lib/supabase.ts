@@ -6,6 +6,9 @@ declare global {
     env: {
       VITE_SUPABASE_URL: string
       VITE_SUPABASE_ANON_KEY: string
+      MODE: string
+      PROD: boolean
+      DEV: boolean
     }
   }
 }
