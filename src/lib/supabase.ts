@@ -24,6 +24,8 @@ if (supabaseUrl) {
   console.log('Supabase URL value:', supabaseUrl)
   console.log('URL starts with https:', supabaseUrl.startsWith('https://'))
   console.log('URL ends with .supabase.co:', supabaseUrl.endsWith('.supabase.co'))
+  console.log('Environment:', import.meta.env.MODE)
+  console.log('Is production:', import.meta.env.PROD)
 }
 
 // Check if environment variables are missing
@@ -47,7 +49,36 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase configuration missing. Please set up environment variables.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'destiny-platform'
+    }
+  }
+})
+
+// Test Supabase connection
+const testConnection = async () => {
+  try {
+    console.log('Testing Supabase connection...')
+    const { data, error } = await supabase.from('profiles').select('count').limit(1)
+    if (error) {
+      console.error('Supabase connection test failed:', error)
+    } else {
+      console.log('✅ Supabase connection successful')
+    }
+  } catch (err) {
+    console.error('❌ Supabase connection test error:', err)
+  }
+}
+
+// Run connection test after a short delay
+setTimeout(testConnection, 1000)
 
 // Database types based on Supabase schema
 export type Profile = {
