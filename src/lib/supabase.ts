@@ -10,19 +10,34 @@ declare global {
   }
 }
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
+// Try to get from environment variables first
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Debug logging
-console.log('Supabase URL:', supabaseUrl)
-console.log('Supabase Key:', supabaseAnonKey ? 'Present' : 'Missing')
+console.log('Environment check:')
+console.log('- VITE_SUPABASE_URL:', supabaseUrl ? 'Present' : 'Missing')
+console.log('- VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Present' : 'Missing')
 
-// Check if we're using placeholder values
-if (supabaseUrl === 'https://placeholder.supabase.co' || supabaseAnonKey === 'placeholder-key') {
-  console.error('⚠️ Supabase not configured! Please set up your environment variables.')
-  console.error('Create a .env.local file with:')
-  console.error('VITE_SUPABASE_URL=your_supabase_url')
-  console.error('VITE_SUPABASE_ANON_KEY=your_supabase_anon_key')
+// Check if environment variables are missing
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('🚨 SUPABASE NOT CONFIGURED!')
+  console.error('')
+  console.error('To fix this:')
+  console.error('1. Create a file named ".env.local" in your version 0.3 folder')
+  console.error('2. Add these lines to the file:')
+  console.error('   VITE_SUPABASE_URL=https://your-project-id.supabase.co')
+  console.error('   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key')
+  console.error('')
+  console.error('3. Get your credentials from: https://supabase.com')
+  console.error('   - Go to your project → Settings → API')
+  console.error('   - Copy Project URL and anon/public key')
+  console.error('')
+  console.error('4. Restart your server after adding the file')
+  console.error('')
+  
+  // Don't create client with invalid credentials
+  throw new Error('Supabase configuration missing. Please set up environment variables.')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
