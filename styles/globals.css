@@ -112,7 +112,7 @@
 }
 
 /* Cabinet Styles */
-@import url('./cabinet.css');
+@import url('../styles/cabinet.css');
 
 /* Custom Scrollbar Styles */
 @layer utilities {
