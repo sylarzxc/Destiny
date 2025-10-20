@@ -19,6 +19,13 @@ console.log('Environment check:')
 console.log('- VITE_SUPABASE_URL:', supabaseUrl ? 'Present' : 'Missing')
 console.log('- VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Present' : 'Missing')
 
+// Additional debugging for Vercel
+if (supabaseUrl) {
+  console.log('Supabase URL value:', supabaseUrl)
+  console.log('URL starts with https:', supabaseUrl.startsWith('https://'))
+  console.log('URL ends with .supabase.co:', supabaseUrl.endsWith('.supabase.co'))
+}
+
 // Check if environment variables are missing
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('🚨 SUPABASE NOT CONFIGURED!')
