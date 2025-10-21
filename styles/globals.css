@@ -112,7 +112,7 @@
 }
 
 /* Cabinet Styles */
-@import url('../styles/cabinet.css');
+@import url('./cabinet.css');
 
 /* Mobile-specific improvements */
 @layer utilities {

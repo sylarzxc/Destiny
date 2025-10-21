@@ -1,4 +1,4 @@
-# 🚨 URGENT: Fix Login Error - Step by Step
+image.png# 🚨 URGENT: Fix Login Error - Step by Step
 
 ## The Problem
 Your login is failing because Supabase is not configured. The console shows `net::ERR_NAME_NOT_RESOLVED` because the app can't find your Supabase database.
